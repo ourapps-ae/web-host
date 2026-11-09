@@ -1,0 +1,14 @@
+# Source mapping
+
+Reference revision: `19905b75dbea89fbfd424d67fe26c81aaed0e018`. Recipe paths are under `OurPoker/recipe/web/`; the install banner is not in the recipe and comes from the frozen McInPoker tree.
+
+- `public/sw.js` lines 1-4 -> `implementation/web/public/sw.js`: copied unchanged.
+- `public/manifest.webmanifest` lines 1-14 -> `implementation/web/templates/manifest.webmanifest.template`: name, short name, colours and icon names become tokens; `id` from the web address is added; `start_url` and `scope` stay relative; the fixed description becomes an option defaulting to the application name.
+- `index.html` lines 1-21 -> `implementation/web/templates/index.html.template`: title, colour, application title, icons and entry module become tokens; `application-name` meta is added so the install banner can read the name; `<body>` content is injected (the recipe's canvas and `#app` stay with the application).
+- `vite.config.ts` lines 1-30 -> `implementation/web/templates/vite.config.ts.template`: relative base, desktop mode, `public` handling and the desktop asset copy are kept; the `livekit-client` alias (video component) and the `install-banner.js` script removal (now a module, so nothing to strip) are left behind; `VITE_APPLICATION_ID` is defined from `applicationId`.
+- `public/_headers` lines 1-2 -> `implementation/web/templates/_headers.template`: copied unchanged.
+- `src/main.ts` lines 120-121 (service worker registration, skipped in the desktop wrapper) -> `implementation/web/runtime.ts` `startShell`: registration result and failure are returned instead of ignored. The rest of `main.ts` (screens, store, video, update check, art) stays with the application.
+- `mcinpoker/web/public/install-banner.js` lines 1-85 (also `ourapps/worker/src/assets/install-banner.js`, byte-identical; recipe `vite.config.ts` lines 19-20 and 24 refer to it but the recipe has no copy) -> `implementation/web/install-banner.ts`, a TypeScript port of the same logic: the decision logic (`bannerKind`), markup (`bannerMarkup`) and behaviour (`startInstallBanner`) are separated so they run against a fake browser; the storage key and texts are options (English texts remain the defaults; the default key changed from `ourapps-install-dismissed` to `install-banner-dismissed`); `data-ourapps-install` became `data-install-banner`.
+- `implementation/web/render.ts` is new: settings validation (the aepm string grammars plus colours), the `{{name}}` / `{{name:json}}` / `{{name:html}}` template filler, and `renderShell`/`writeShell`. It has no recipe counterpart.
+
+Left behind: `wrangler.jsonc` and deployment (release pipeline), `package.json`, `tsconfig.json`, all screens and styles, the update check at `main.ts` lines 100-105, the art manifest, sounds and test scripts under `web/test/`.

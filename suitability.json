@@ -1,0 +1,15 @@
+{
+  "format": 1,
+  "jobs": ["web-host"],
+  "profiles": [
+    {
+      "id": "any",
+      "load": {},
+      "cost": "none",
+      "regions": ["any"],
+      "compliance": [],
+      "notes": "Produces static files and browser code only; load, cost and region depend on the static file host chosen to serve them, which this component does not select."
+    }
+  ],
+  "notes": "No provider limits are cited because the component deploys nothing."
+}

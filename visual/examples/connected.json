@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "id": "web-host-connected",
+  "title": "Web host: connected consumer",
+  "status": "example",
+  "view": "component",
+  "focus": "component",
+  "definitions": [
+    {
+      "id": "ourapps-ae.web-host",
+      "name": "Web host",
+      "kind": "component",
+      "status": "example",
+      "package": "ourapps-ae/web-host",
+      "version": "0.3.0",
+      "ports": [
+        {
+          "id": "theme",
+          "name": "Theme",
+          "direction": "input",
+          "kind": "interface",
+          "type": "ae/theme",
+          "version": "1.0.0",
+          "required": true,
+          "cardinality": "one"
+        },
+        {
+          "id": "web-shell",
+          "name": "Web shell",
+          "direction": "output",
+          "kind": "interface",
+          "type": "ae/web-shell",
+          "version": "1.0.0"
+        }
+      ],
+      "settings": [
+        {
+          "id": "applicationId",
+          "name": "Applicationid",
+          "type": "string",
+          "required": true,
+          "secret": false
+        },
+        {
+          "id": "applicationName",
+          "name": "Applicationname",
+          "type": "string",
+          "required": true,
+          "secret": false
+        },
+        {
+          "id": "shortName",
+          "name": "Shortname",
+          "type": "string",
+          "required": true,
+          "secret": false
+        },
+        {
+          "id": "themeColour",
+          "name": "Themecolour",
+          "type": "string",
+          "required": true,
+          "secret": false
+        },
+        {
+          "id": "backgroundColour",
+          "name": "Backgroundcolour",
+          "type": "string",
+          "required": true,
+          "secret": false
+        },
+        {
+          "id": "iconPath",
+          "name": "Iconpath",
+          "type": "string",
+          "required": false,
+          "secret": false,
+          "default": "icon"
+        },
+        {
+          "id": "webAddress",
+          "name": "Webaddress",
+          "type": "string",
+          "required": true,
+          "secret": false
+        }
+      ]
+    },
+    {
+      "id": "consumer",
+      "name": "Example application consumer",
+      "kind": "application",
+      "status": "example",
+      "revision": "0.1.0",
+      "ports": [
+        {
+          "id": "web-shell",
+          "name": "Web shell",
+          "direction": "input",
+          "kind": "interface",
+          "type": "ae/web-shell",
+          "version": "1.0.0",
+          "required": true,
+          "cardinality": "one"
+        },
+        {
+          "id": "theme",
+          "name": "Theme",
+          "direction": "output",
+          "kind": "interface",
+          "type": "ae/theme",
+          "version": "1.0.0"
+        }
+      ],
+      "settings": []
+    }
+  ],
+  "instances": [
+    {
+      "id": "component",
+      "name": "Web host",
+      "definition": "ourapps-ae.web-host",
+      "configuration": {
+        "applicationId": "example",
+        "applicationName": "example",
+        "shortName": "example",
+        "themeColour": "example",
+        "backgroundColour": "example",
+        "webAddress": "example"
+      }
+    },
+    {
+      "id": "consumer",
+      "name": "Example consumer",
+      "definition": "consumer",
+      "configuration": {}
+    }
+  ],
+  "connections": [
+    {
+      "source": {
+        "instance": "component",
+        "port": "web-shell"
+      },
+      "target": {
+        "instance": "consumer",
+        "port": "web-shell"
+      }
+    },
+    {
+      "source": {
+        "instance": "consumer",
+        "port": "theme"
+      },
+      "target": {
+        "instance": "component",
+        "port": "theme"
+      }
+    }
+  ]
+}

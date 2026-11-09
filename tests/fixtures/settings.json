@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "applicationId": "ourpoker",
+    "applicationName": "OurPoker",
+    "shortName": "OurPoker",
+    "themeColour": "midnight",
+    "backgroundColour": "#120A10",
+    "iconPath": "icon",
+    "webAddress": "https://ourpoker.example.com"
+  },
+  "colours": { "midnight": "#120a10" }
+}

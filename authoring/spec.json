@@ -1,0 +1,108 @@
+{
+  "name": "web-host",
+  "version": "0.3.0",
+  "title": "Web host",
+  "description": "Installable web application shell: manifest, page, service worker, headers, build configuration and the install banner, rendered from typed settings.",
+  "facilities": [
+    {
+      "id": "web-shell",
+      "description": "Installable web application shell"
+    }
+  ],
+  "provides": [
+    {
+      "id": "web-shell",
+      "type": "ae/web-shell",
+      "version": "1.0.0",
+      "path": "interfaces/web-shell.json"
+    }
+  ],
+  "requires": [
+    {
+      "id": "theme",
+      "type": "ae/theme",
+      "version": "1.0.0",
+      "path": "interfaces/required/theme.json"
+    }
+  ],
+  "collect": [
+    {
+      "id": "applicationId",
+      "type": "string",
+      "grammar": "slug",
+      "required": true,
+      "secret": false
+    },
+    {
+      "id": "applicationName",
+      "type": "string",
+      "grammar": "label",
+      "required": true,
+      "secret": false
+    },
+    {
+      "id": "shortName",
+      "type": "string",
+      "grammar": "label",
+      "required": true,
+      "secret": false
+    },
+    {
+      "id": "themeColour",
+      "type": "string",
+      "grammar": "identifier",
+      "required": true,
+      "secret": false
+    },
+    {
+      "id": "backgroundColour",
+      "type": "string",
+      "grammar": "identifier",
+      "required": true,
+      "secret": false
+    },
+    {
+      "id": "iconPath",
+      "type": "string",
+      "grammar": "slug",
+      "required": false,
+      "secret": false,
+      "default": "icon"
+    },
+    {
+      "id": "webAddress",
+      "type": "string",
+      "grammar": "address",
+      "required": true,
+      "secret": false
+    }
+  ],
+  "dependencies": [],
+  "tools": {
+    "node": "26.5.0"
+  },
+  "platforms": [
+    "web"
+  ],
+  "suites": [
+    {
+      "id": "web",
+      "argv": [
+        "node",
+        "--test",
+        "tests/web.test.ts"
+      ]
+    }
+  ],
+  "text": {
+    "purpose": "Turns a web application into an installable one: renders the web manifest, the start page, the response headers and the build configuration from typed settings, ships a service worker that makes the page installable without caching, and starts the shell in the browser with an add-to-home-screen banner. The application supplies its own screens through the entry module and the page body.",
+    "userInputs": "The installer collects these settings. Colours are names of colours in the theme component (the collected setting grammar cannot carry #rrggbb); the render functions also accept #rrggbb when run outside the installer. `iconPath` names the icon files in the web `public/` folder: `<iconPath>.png` is 512 pixels square and `<iconPath>-192.png` is 192 pixels square.",
+    "integration": "At build time call `renderShell(settings, {colours})` from `web/render.ts` and write the result with `writeShell` (index.html, vite.config.ts, public/manifest.webmanifest, public/_headers, public/sw.js); `colours` is the colour table of the connected theme. In the application's main module call `startShell(browserHost(), {desktop})` from `web/runtime.ts` once; it registers `./sw.js` and starts the install banner, and does neither when `desktop` is true. The application keeps its own screens, art, strings and its `src/main.ts` entry. `examples/consumer.ts` does both steps without a game.",
+    "infrastructure": "No service is deployed by this package. The rendered files are static and need any static file host served over https at `webAddress`; the hosting account belongs to the release pipeline or the developer. Install prompts need https and a browser that supports installation.",
+    "verification": "`node --test tests/web.test.ts` renders the shell from fixture settings and checks the manifest, page, headers and build configuration, runs `sw.js` against a fake service worker scope, and drives the install banner against fake browsers for iPhone Safari, in-app iPhone browsers, iPadOS desktop mode, Android and desktop Chrome, including dismissal and installed state. Real browser installation was not exercised.",
+    "scenarios": "Safari on iPhone shows the Share instructions; Chrome on Android or desktop shows a one-tap Add button; an application already on the home screen or dismissed within three days shows nothing; the desktop wrapper skips the service worker and banner.",
+    "updates": "Patch updates replace the owned files without migrating data; the service worker never caches, so a new deployment reaches installed copies at once. Removal deletes the owned sources and the application's imports; no application data is held. "
+  },
+  "agentInstructions": "Select `ourapps-ae/web-host` when the recipe's targets include `web`. Connect the `theme` requirement to the theme component so colour names resolve. Pass the answers for application name, short name, colours, icon and web address as settings. Provide the 512 and 192 pixel icons in the application's `public/` folder.",
+  "developerInstructions": "Supply the application's own `src/main.ts`, screens and the two icon files. Run `renderShell` as part of the build, then `vite build`. Serve `dist/` over https at the web address. Supply no accounts or keys to this component; the hosting account is configured where the files are published. To check installability open the deployed address in Chrome (Application panel, Manifest) or Safari (Share, Add to Home Screen)."
+}

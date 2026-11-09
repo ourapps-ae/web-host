@@ -1,0 +1,64 @@
+{
+  "id": "web-shell",
+  "type": "ae/web-shell",
+  "version": "1.0.0",
+  "operations": {
+    "validateSettings": {
+      "arguments": [
+        "settings:WebShellSettings",
+        "colours:Record<string,string>|undefined"
+      ],
+      "returns": "ResolvedSettings"
+    },
+    "resolveColour": {
+      "arguments": [
+        "name:string",
+        "value:string",
+        "colours:Record<string,string>|undefined"
+      ],
+      "returns": "string"
+    },
+    "renderShell": {
+      "arguments": [
+        "settings:WebShellSettings",
+        "options:RenderOptions|undefined"
+      ],
+      "returns": "Record<string,string>"
+    },
+    "writeShell": {
+      "arguments": [
+        "directory:string",
+        "files:Record<string,string>"
+      ],
+      "returns": "void"
+    },
+    "startShell": {
+      "arguments": [
+        "host:ShellHost",
+        "options:ShellOptions|undefined"
+      ],
+      "returns": "{serviceWorker:Promise<boolean>,removeBanner:()=>void}"
+    },
+    "startInstallBanner": {
+      "arguments": [
+        "host:BannerHost",
+        "options:BannerOptions|undefined"
+      ],
+      "returns": "()=>void"
+    },
+    "bannerKind": {
+      "arguments": [
+        "environment:BannerEnvironment",
+        "hasInstallPrompt:boolean"
+      ],
+      "returns": "none|install|safari|in-app|android"
+    }
+  },
+  "types": {
+    "WebShellSettings": "{applicationId:slug,applicationName:label,shortName:label(max 12),themeColour:#rrggbb|themeColourName,backgroundColour:#rrggbb|themeColourName,iconPath:slug (base name: <iconPath>.png is 512 square, <iconPath>-192.png is 192 square, in public/),webAddress:address}",
+    "RenderOptions": "{colours?:Record<string,string>,description?:string,language?:string,entry?:string,body?:string}"
+  },
+  "requirements": {
+    "theme": "Colour names in themeColour and backgroundColour resolve through the colours map taken from the theme interface; #rrggbb values need no theme. The operations used are listed in interfaces/required/theme.json."
+  }
+}
