@@ -1,0 +1,1422 @@
+{
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "ae/theme",
+    "version": "1.0.0",
+    "description": "Design tokens for colours, spacing, radii, type scale and an animated background, rendered to CSS variables, Swift constants and Kotlin constants. Web: implementation/web/tokens.ts and background.ts. Apple: ThemeTypes.swift, ThemeTokens.swift, BackgroundMath.swift, ThemeBackgroundView.swift. Android: package ae.theme."
+  },
+  "methods": [
+    {
+      "name": "validateTokens",
+      "description": "Checks a value against the Tokens shape and returns one message per problem; an empty list means valid. Web (tokens.ts) only; Swift and Kotlin hold the generated ThemeTokens constants, which their compilers check.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "description": "Any value.",
+          "required": true,
+          "schema": {}
+        }
+      ],
+      "result": {
+        "name": "problems",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "resolveTheme",
+      "description": "The named theme with the installer's colour overrides applied; an unknown or missing name gives the file's default theme. Swift: ThemeSet.named(_:) then .resolved(primary:table:), ignoring a malformed colour instead of throwing. Kotlin: ThemeSet.named(name).resolved(primary, table), likewise.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        },
+        {
+          "name": "settings",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeSettings"
+          }
+        }
+      ],
+      "result": {
+        "name": "tokens",
+        "schema": {
+          "$ref": "#/components/schemas/Tokens"
+        }
+      },
+      "errors": [
+        {
+          "code": 1,
+          "message": "primaryColour is not a colour (write hex rrggbb)"
+        },
+        {
+          "code": 2,
+          "message": "tableColour is not a colour (write hex rrggbb)"
+        },
+        {
+          "code": 3,
+          "message": "no themes"
+        }
+      ]
+    },
+    {
+      "name": "themeNames",
+      "description": "The theme names in file order. Swift: ThemeTokens.all.keys. Kotlin: ThemeTokens.ALL.keys.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        }
+      ],
+      "result": {
+        "name": "names",
+        "schema": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "colourTable",
+      "description": "Every colour name to #rrggbb with opacity dropped; web-host takes it as the colours map for themeColour and backgroundColour. Web only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "colours",
+        "schema": {
+          "$ref": "#/components/schemas/ColourTable"
+        }
+      }
+    },
+    {
+      "name": "accentColour",
+      "description": "The primary colour as #rrggbb, the apple-host shell tint. Swift: ThemeSet.accent (a ThemeColour).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "colour",
+        "schema": {
+          "$ref": "#/components/schemas/OpaqueColour"
+        }
+      }
+    },
+    {
+      "name": "shellPalette",
+      "description": "The five colours of android-host's ShellPalette as 0xAARRGGBB numbers; the table colour is the secondary colour. Kotlin: ThemeSet.palette() returning ThemePalette(primary, secondary, background, surface, onPrimary) of Long.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "palette",
+        "schema": {
+          "$ref": "#/components/schemas/ShellPalette"
+        }
+      }
+    },
+    {
+      "name": "cssVariables",
+      "description": "The CSS custom properties for one theme. Web only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "variables",
+        "schema": {
+          "$ref": "#/components/schemas/CssVariables"
+        }
+      }
+    },
+    {
+      "name": "renderCss",
+      "description": "theme.css text: the default theme under :root and every other theme under [data-theme=\"name\"]. Web (node) only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        }
+      ],
+      "result": {
+        "name": "css",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "renderSwift",
+      "description": "ThemeTokens.swift text: one static ThemeSet per theme, defaultName and the all map. Web (node) only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        }
+      ],
+      "result": {
+        "name": "swift",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "renderKotlin",
+      "description": "ThemeTokens.kt text: one ThemeSet per theme, DEFAULT_NAME and the ALL map, colours as 0xAARRGGBB Longs. Web (node) only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        }
+      ],
+      "result": {
+        "name": "kotlin",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "buildAll",
+      "description": "Validates every theme and renders the CSS, Swift and Kotlin texts (build-tokens.ts; its command line writes them as files). Web (node) only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "file",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ThemeFile"
+          }
+        }
+      ],
+      "result": {
+        "name": "outputs",
+        "schema": {
+          "$ref": "#/components/schemas/BuildOutput"
+        }
+      },
+      "errors": [
+        {
+          "code": 4,
+          "message": "<theme>: <problem>; ... (tokens do not validate)"
+        }
+      ]
+    },
+    {
+      "name": "applyTheme",
+      "description": "Sets the CSS custom properties of one theme on an element, normally document.documentElement. Web (browser) only; Swift reads ThemeSet values and Color(themeColour), Kotlin ThemeSet.composeColours().",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "tokens",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        },
+        {
+          "name": "element",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/StyleTarget"
+          }
+        }
+      ],
+      "result": {
+        "name": "none",
+        "schema": {
+          "type": "null"
+        },
+        "description": "Nothing is returned."
+      }
+    },
+    {
+      "name": "isColour",
+      "description": "True when the value is #rrggbb or #rrggbbaa. Web only.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "value",
+          "required": true,
+          "schema": {}
+        }
+      ],
+      "result": {
+        "name": "colour",
+        "schema": {
+          "type": "boolean"
+        }
+      }
+    },
+    {
+      "name": "parseColourSetting",
+      "description": "Reads an installer colour and returns #rrggbb or #rrggbbaa in lower case. Swift: ThemeColour.setting(_:) returning nil instead of throwing. Kotlin: parseColourSetting(value) returning a 0xAARRGGBB Long or null.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "value",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "result": {
+        "name": "colour",
+        "schema": {
+          "$ref": "#/components/schemas/Colour"
+        }
+      },
+      "errors": [
+        {
+          "code": 1,
+          "message": "not a colour (write hex rrggbb)"
+        }
+      ]
+    },
+    {
+      "name": "parseColour",
+      "description": "Channels 0 to 255 and opacity 0 to 1 of a colour. Swift: ThemeColour(hex:) (failable; channels 0 to 1). Kotlin: parseColour(hex) returning a 0xAARRGGBB Long or null.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "hex",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Colour"
+          }
+        }
+      ],
+      "result": {
+        "name": "rgba",
+        "schema": {
+          "$ref": "#/components/schemas/Rgba"
+        }
+      },
+      "errors": [
+        {
+          "code": 1,
+          "message": "not a colour"
+        }
+      ]
+    },
+    {
+      "name": "makeParticles",
+      "description": "The seeded drifting glyphs. Swift: BackgroundMath.particles (14, GlyphParticle(seed:glyphCount:)). Kotlin: GlyphParticle.seeded(seed, glyphCount). Each platform seeds its own generator, so positions differ between platforms; the placement maths is the same.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "count",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 14
+          }
+        },
+        {
+          "name": "glyphCount",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 4
+          }
+        }
+      ],
+      "result": {
+        "name": "particles",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Particle"
+          }
+        }
+      }
+    },
+    {
+      "name": "makeSpecks",
+      "description": "The seeded specks. Swift: BackgroundMath.specks (120, Speck(seed:)). Kotlin: Speck.seeded(seed).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "count",
+          "required": false,
+          "schema": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 120
+          }
+        }
+      ],
+      "result": {
+        "name": "specks",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/Speck"
+          }
+        }
+      }
+    },
+    {
+      "name": "flicker",
+      "description": "The glow's brightness at time t in seconds, about 0.4 to 0.85. Swift: BackgroundMath.flicker(_:_:). Kotlin: BackgroundMath.flicker(style, t).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "style",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BackgroundStyle"
+          }
+        },
+        {
+          "name": "t",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        }
+      ],
+      "result": {
+        "name": "light",
+        "schema": {
+          "type": "number"
+        }
+      }
+    },
+    {
+      "name": "glyphFrame",
+      "description": "Where one glyph is drawn at time t (already multiplied by the style's speed), or null when it is off screen or fainter than 0.01. Swift: BackgroundMath.glyphFrame(_:style:t:light:width:height:) returning GlyphFrame? with rotationDegrees and size from the width. Kotlin: BackgroundMath.glyphFrame(p, style, t, light, width, height) likewise.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "particle",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Particle"
+          }
+        },
+        {
+          "name": "style",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BackgroundStyle"
+          }
+        },
+        {
+          "name": "t",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "light",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "width",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "height",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "sizeBase",
+          "description": "Size reference; defaults to width.",
+          "required": false,
+          "schema": {
+            "type": "number"
+          }
+        }
+      ],
+      "result": {
+        "name": "frame",
+        "schema": {
+          "anyOf": [
+            {
+              "$ref": "#/components/schemas/GlyphFrame"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "speckFrame",
+      "description": "Where one speck is drawn at time t in seconds. Swift: BackgroundMath.speckFrame(_:style:t:width:height:). Kotlin: BackgroundMath.speckFrame(sp, style, t, width, height).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "speck",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Speck"
+          }
+        },
+        {
+          "name": "style",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BackgroundStyle"
+          }
+        },
+        {
+          "name": "t",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "width",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "height",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        }
+      ],
+      "result": {
+        "name": "frame",
+        "schema": {
+          "$ref": "#/components/schemas/SpeckFrame"
+        }
+      }
+    },
+    {
+      "name": "figureBox",
+      "description": "The box of a front figure: the largest that fits its height and width fractions, in its corner. Swift and Kotlin compute the same box inside ThemeBackgroundView and ThemeBackground.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "front",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Front"
+          }
+        },
+        {
+          "name": "imageWidth",
+          "required": true,
+          "schema": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        {
+          "name": "imageHeight",
+          "required": true,
+          "schema": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        {
+          "name": "width",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "name": "height",
+          "required": true,
+          "schema": {
+            "type": "number"
+          }
+        }
+      ],
+      "result": {
+        "name": "box",
+        "schema": {
+          "$ref": "#/components/schemas/Box"
+        }
+      }
+    },
+    {
+      "name": "Background",
+      "description": "Starts the animated background on a full-window canvas: fills the theme background colour, draws the scene picture, glyphs, specks, glow, vignette and front figures each animation frame. Returns the instance that Background.setTheme, Background.setScene and Background.stop act on; its figures property (default true) shows the front figures. Web (browser): new Background(canvas, theme). Swift: the SwiftUI view ThemeBackgroundView(theme:scene:figures:) in UIKit targets. Kotlin: the Compose function ThemeBackground(theme, scene, figures, modifier).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "canvas",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Canvas"
+          }
+        },
+        {
+          "name": "theme",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "background",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "figures": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "figures"
+          ],
+          "description": "The running background."
+        }
+      }
+    },
+    {
+      "name": "Background.setTheme",
+      "description": "Changes the tokens the running background draws with. Swift and Kotlin: pass a different theme to the view or function.",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "theme",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Tokens"
+          }
+        }
+      ],
+      "result": {
+        "name": "none",
+        "schema": {
+          "type": "null"
+        },
+        "description": "Nothing is returned."
+      }
+    },
+    {
+      "name": "Background.setScene",
+      "description": "Sets the pictures; a picture that does not load is left out. Swift: BackgroundScene(id:back:front:anchor:fronts:) with UIImages and SceneFront corners topLeft, bottomLeft, bottomRight. Kotlin: BackgroundScene(back, front, anchor, fronts) with ImageBitmaps and SceneFront(at, h, maxW, flipX, flipY).",
+      "paramStructure": "by-position",
+      "params": [
+        {
+          "name": "scene",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/Scene"
+          }
+        }
+      ],
+      "result": {
+        "name": "none",
+        "schema": {
+          "type": "null"
+        },
+        "description": "Nothing is returned."
+      }
+    },
+    {
+      "name": "Background.stop",
+      "description": "Stops the animation. Swift and Kotlin stop when the view leaves the screen.",
+      "paramStructure": "by-position",
+      "params": [],
+      "result": {
+        "name": "none",
+        "schema": {
+          "type": "null"
+        },
+        "description": "Nothing is returned."
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Colour": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$",
+        "description": "#rrggbb or #rrggbbaa (opacity in the last two digits)."
+      },
+      "OpaqueColour": {
+        "type": "string",
+        "pattern": "^#[0-9a-f]{6}$",
+        "description": "#rrggbb in lower case, opacity dropped."
+      },
+      "ColourSetting": {
+        "type": "string",
+        "pattern": "^\\s*([hH][eE][xX]\\s+)?#?[0-9a-fA-F]{6}([0-9a-fA-F]{2})?\\s*$",
+        "description": "An installer colour: 'hex rrggbb' or 'hex rrggbbaa' (an aepm string setting cannot hold '#' and starts with a letter); '#rrggbb' and 'rrggbb' are accepted too."
+      },
+      "ColourName": {
+        "type": "string",
+        "enum": [
+          "background",
+          "surface",
+          "edge",
+          "primary",
+          "onPrimary",
+          "table",
+          "tableEdge",
+          "text",
+          "muted",
+          "danger",
+          "good",
+          "warning",
+          "paper",
+          "paperAccent"
+        ]
+      },
+      "Size": {
+        "type": "number",
+        "minimum": 0,
+        "description": "Points (CSS pixels on the web)."
+      },
+      "Tokens": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "colour",
+          "spacing",
+          "radii",
+          "type",
+          "background"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$"
+          },
+          "colour": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "background",
+              "surface",
+              "edge",
+              "primary",
+              "onPrimary",
+              "table",
+              "tableEdge",
+              "text",
+              "muted",
+              "danger",
+              "good",
+              "warning",
+              "paper",
+              "paperAccent"
+            ],
+            "properties": {
+              "background": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "surface": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "edge": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "primary": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "onPrimary": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "table": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "tableEdge": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "text": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "muted": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "danger": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "good": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "warning": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "paper": {
+                "$ref": "#/components/schemas/Colour"
+              },
+              "paperAccent": {
+                "$ref": "#/components/schemas/Colour"
+              }
+            }
+          },
+          "spacing": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "xs",
+              "sm",
+              "md",
+              "lg",
+              "xl"
+            ],
+            "properties": {
+              "xs": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "sm": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "md": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "lg": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "xl": {
+                "$ref": "#/components/schemas/Size"
+              }
+            }
+          },
+          "radii": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sm",
+              "md",
+              "lg",
+              "pill"
+            ],
+            "properties": {
+              "sm": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "md": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "lg": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "pill": {
+                "$ref": "#/components/schemas/Size"
+              }
+            }
+          },
+          "type": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "family",
+              "caption",
+              "small",
+              "body",
+              "subtitle",
+              "title",
+              "display"
+            ],
+            "properties": {
+              "family": {
+                "type": "string",
+                "minLength": 1
+              },
+              "caption": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "small": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "body": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "subtitle": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "title": {
+                "$ref": "#/components/schemas/Size"
+              },
+              "display": {
+                "$ref": "#/components/schemas/Size"
+              }
+            }
+          },
+          "background": {
+            "$ref": "#/components/schemas/BackgroundStyle"
+          }
+        },
+        "description": "Design tokens for one theme."
+      },
+      "BackgroundStyle": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "tint",
+          "glow",
+          "glowFromTop",
+          "speed",
+          "suitAlpha",
+          "specks",
+          "speckUp",
+          "speckColour",
+          "glyphs"
+        ],
+        "properties": {
+          "tint": {
+            "$ref": "#/components/schemas/Colour"
+          },
+          "glow": {
+            "$ref": "#/components/schemas/Colour"
+          },
+          "glowFromTop": {
+            "type": "boolean"
+          },
+          "speed": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "suitAlpha": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "specks": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 120
+          },
+          "speckUp": {
+            "type": "boolean"
+          },
+          "speckColour": {
+            "$ref": "#/components/schemas/Colour"
+          },
+          "glyphs": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8,
+            "description": "Characters that drift toward the viewer."
+          }
+        },
+        "description": "The animated background: glyph tint, glow colour and side, drift speed, glyph opacity, speck count, direction and colour, and the glyphs."
+      },
+      "ThemeFile": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "format",
+          "default",
+          "themes"
+        ],
+        "properties": {
+          "format": {
+            "const": 1
+          },
+          "default": {
+            "type": "string",
+            "description": "Name of the default theme."
+          },
+          "themes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tokens"
+            }
+          }
+        },
+        "description": "themes.json: every theme of the application."
+      },
+      "ThemeSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [],
+        "properties": {
+          "themeName": {
+            "type": "string",
+            "description": "A theme name; unknown names give the default theme."
+          },
+          "primaryColour": {
+            "anyOf": [
+              {
+                "const": ""
+              },
+              {
+                "$ref": "#/components/schemas/ColourSetting"
+              }
+            ],
+            "description": "Replaces colour.primary; empty keeps the theme's own."
+          },
+          "tableColour": {
+            "anyOf": [
+              {
+                "const": ""
+              },
+              {
+                "$ref": "#/components/schemas/ColourSetting"
+              }
+            ],
+            "description": "Replaces colour.table; empty keeps the theme's own."
+          }
+        }
+      },
+      "ColourTable": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "background",
+          "surface",
+          "edge",
+          "primary",
+          "onPrimary",
+          "table",
+          "tableEdge",
+          "text",
+          "muted",
+          "danger",
+          "good",
+          "warning",
+          "paper",
+          "paperAccent"
+        ],
+        "properties": {
+          "background": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "surface": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "edge": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "primary": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "onPrimary": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "table": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "tableEdge": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "text": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "muted": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "danger": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "good": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "warning": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "paper": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          },
+          "paperAccent": {
+            "$ref": "#/components/schemas/OpaqueColour"
+          }
+        },
+        "description": "Every colour name to #rrggbb."
+      },
+      "ShellPalette": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "primary",
+          "secondary",
+          "background",
+          "surface",
+          "onPrimary"
+        ],
+        "properties": {
+          "primary": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "secondary": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "background": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "surface": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "onPrimary": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 4294967295
+          }
+        },
+        "description": "Colours as 0xAARRGGBB numbers; secondary is the table colour."
+      },
+      "CssVariables": {
+        "type": "object",
+        "propertyNames": {
+          "pattern": "^--[a-z][a-z0-9-]*$"
+        },
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "CSS custom property name to value: --<colour name in kebab case>, --space-<size>, --radius-<size>, --font-family, --font-<size>, --glow, --tint."
+      },
+      "Rgba": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "r",
+          "g",
+          "b",
+          "a"
+        ],
+        "properties": {
+          "r": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "g": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "b": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          },
+          "a": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "StyleTarget": {
+        "type": "object",
+        "description": "A host object with style.setProperty(name, value), such as document.documentElement."
+      },
+      "Canvas": {
+        "type": "object",
+        "description": "A browser HTMLCanvasElement."
+      },
+      "Particle": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "period",
+          "phase",
+          "spin",
+          "sway",
+          "sprite"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "period": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "phase": {
+            "type": "number"
+          },
+          "spin": {
+            "type": "number"
+          },
+          "sway": {
+            "type": "number"
+          },
+          "sprite": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "description": "One drifting glyph: start position, cycle length in seconds, phase 0 to 1, spin and sway, and the glyph index."
+      },
+      "Speck": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "phase",
+          "period",
+          "size",
+          "wobble"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "phase": {
+            "type": "number"
+          },
+          "period": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "size": {
+            "type": "number"
+          },
+          "wobble": {
+            "type": "number"
+          }
+        }
+      },
+      "GlyphFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "size",
+          "alpha",
+          "rotation",
+          "sprite"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "size": {
+            "type": "number"
+          },
+          "alpha": {
+            "type": "number"
+          },
+          "rotation": {
+            "type": "number",
+            "description": "Degrees."
+          },
+          "sprite": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "SpeckFrame": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "radius",
+          "alpha"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "radius": {
+            "type": "number"
+          },
+          "alpha": {
+            "type": "number"
+          }
+        }
+      },
+      "Front": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "at",
+          "h",
+          "maxW"
+        ],
+        "properties": {
+          "at": {
+            "type": "string",
+            "enum": [
+              "tl",
+              "bl",
+              "br"
+            ],
+            "description": "Corner: top left, bottom left, bottom right."
+          },
+          "h": {
+            "type": "number",
+            "description": "Height as a fraction of the screen height."
+          },
+          "maxW": {
+            "type": "number",
+            "description": "Largest width as a fraction of the screen width."
+          },
+          "flipX": {
+            "type": "boolean"
+          },
+          "flipY": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Scene": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "anchor",
+          "fronts"
+        ],
+        "properties": {
+          "back": {
+            "type": "string",
+            "description": "URL of the picture behind."
+          },
+          "front": {
+            "type": "string",
+            "description": "URL of the figure picture."
+          },
+          "anchor": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "0 shows the top of a picture taller than the screen, 1 the bottom."
+          },
+          "fronts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Front"
+            }
+          }
+        }
+      },
+      "Box": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "x",
+          "y",
+          "w",
+          "h"
+        ],
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "w": {
+            "type": "number"
+          },
+          "h": {
+            "type": "number"
+          }
+        }
+      },
+      "BuildOutput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "css",
+          "swift",
+          "kotlin"
+        ],
+        "properties": {
+          "css": {
+            "type": "string"
+          },
+          "swift": {
+            "type": "string"
+          },
+          "kotlin": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -32,10 +32,10 @@ Dependencies: none.
 `tools.lock.json` pins verification tools: node 26.5.0. Licence wording remains deferred.
 
 ## Provided interfaces
-- `interfaces/web-shell.json` defines `web-shell` (ae/web-shell) version 1.0.0.
+- `interfaces/web-shell.json` defines `web-shell` (ae/web-shell) version 1.0.0 as an OpenRPC 1.3.2 document: one method per exported function (`validateSettings`, `resolveColour`, `renderShell`, `writeShell`, `startShell`, `browserHost`, `startInstallBanner`, `bannerKind`), its parameters and result as JSON Schema 2020-12, and `SettingsError` where a setting breaks its grammar.
 
 ## Required interfaces
-- `theme` (ae/theme) version 1.0.0, supplied by the recipe or application. The operations used are listed in `interfaces/required/theme.json`: theme `colourTable` (build time) for `themeColour` and `backgroundColour`.
+- `theme` (ae/theme) version 1.0.0, supplied by the recipe or application. `interfaces/required-theme.json` is a copy of the theme component's interface document; web-host uses its `colourTable` result (build time) for `themeColour` and `backgroundColour`.
 
 ## Integration
 At build time call `renderShell(settings, {colours})` from `web/render.ts` and write the result with `writeShell` (index.html, vite.config.ts, public/manifest.webmanifest, public/_headers, public/sw.js); `colours` is the colour table of the connected theme. In the application's main module call `startShell(browserHost(), {desktop})` from `web/runtime.ts` once; it registers `./sw.js` and starts the install banner, and does neither when `desktop` is true. The application keeps its own screens, art, strings and its `src/main.ts` entry. `examples/consumer.ts` does both steps without a game.

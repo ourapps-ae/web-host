@@ -1,265 +1,54 @@
 {
-  "format": 1,
-  "kind": "component",
-  "identity": {
-    "name": "ourapps-ae/web-host",
-    "version": "0.3.0",
-    "sourceRevision": "19905b75dbea89fbfd424d67fe26c81aaed0e018",
-    "sourceTreeDigest": "0000000000000000000000000000000000000000000000000000000000000000",
-    "licenceStatus": "deferred"
-  },
-  "facilities": [
-    {
-      "id": "web-shell",
-      "description": "Installable web application shell"
-    }
-  ],
-  "documents": {
-    "contract": "CONTRACT.md",
-    "interfaces": [
-      "interfaces/required/theme.json",
-      "interfaces/web-shell.json",
-      "suitability.json"
-    ],
-    "examples": [
-      "examples/consumer.ts"
-    ],
-    "licenceNotice": "LICENCE"
-  },
-  "collect": [
-    {
-      "id": "applicationId",
-      "type": "string",
-      "grammar": "slug",
-      "required": true,
-      "secret": false
-    },
-    {
-      "id": "applicationName",
-      "type": "string",
-      "grammar": "label",
-      "required": true,
-      "secret": false
-    },
-    {
-      "id": "shortName",
-      "type": "string",
-      "grammar": "label",
-      "required": true,
-      "secret": false
-    },
-    {
-      "id": "themeColour",
-      "type": "string",
-      "grammar": "identifier",
-      "required": true,
-      "secret": false
-    },
-    {
-      "id": "backgroundColour",
-      "type": "string",
-      "grammar": "identifier",
-      "required": true,
-      "secret": false
-    },
-    {
-      "id": "iconPath",
-      "type": "string",
-      "grammar": "slug",
-      "required": false,
-      "secret": false,
-      "default": "icon"
-    },
-    {
-      "id": "webAddress",
-      "type": "string",
-      "grammar": "address",
-      "required": true,
-      "secret": false
-    }
-  ],
-  "files": [
-    {
-      "path": "CONTRACT.md",
-      "executable": false
-    },
-    {
-      "path": "INSTRUCTIONS.md",
-      "executable": false
-    },
-    {
-      "path": "LICENCE",
-      "executable": false
-    },
-    {
-      "path": "SOURCE.md",
-      "executable": false
-    },
-    {
-      "path": "examples/consumer.ts",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/install-banner.ts",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/public/sw.js",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/render.ts",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/runtime.ts",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/templates/_headers.template",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/templates/index.html.template",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/templates/manifest.webmanifest.template",
-      "executable": false
-    },
-    {
-      "path": "implementation/web/templates/vite.config.ts.template",
-      "executable": false
-    },
-    {
-      "path": "interfaces/required/theme.json",
-      "executable": false
-    },
-    {
-      "path": "interfaces/web-shell.json",
-      "executable": false
-    },
-    {
-      "path": "suitability.json",
-      "executable": false
-    },
-    {
-      "path": "tests/fixtures/agents.json",
-      "executable": false
-    },
-    {
-      "path": "tests/fixtures/settings.json",
-      "executable": false
-    },
-    {
-      "path": "tests/web.test.ts",
-      "executable": false
-    },
-    {
-      "path": "tools.lock.json",
-      "executable": false
-    },
-    {
-      "path": "visual/definition.json",
-      "executable": false
-    },
-    {
-      "path": "visual/examples/connected.json",
-      "executable": false
-    },
-    {
-      "path": "visual/output/connected.png",
-      "executable": false
-    },
-    {
-      "path": "visual/output/connected.svg",
-      "executable": false
-    },
-    {
-      "path": "visual/output/description.md",
-      "executable": false
-    }
-  ],
   "artefacts": [
     {
-      "source": "implementation/web/install-banner.ts",
       "destination": "components/web-host/web/install-banner.ts",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/install-banner.ts",
+      "template": false
     },
     {
-      "source": "implementation/web/public/sw.js",
       "destination": "components/web-host/web/public/sw.js",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/public/sw.js",
+      "template": false
     },
     {
-      "source": "implementation/web/render.ts",
       "destination": "components/web-host/web/render.ts",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/render.ts",
+      "template": false
     },
     {
-      "source": "implementation/web/runtime.ts",
       "destination": "components/web-host/web/runtime.ts",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/runtime.ts",
+      "template": false
     },
     {
-      "source": "implementation/web/templates/_headers.template",
       "destination": "components/web-host/web/templates/_headers.template",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/templates/_headers.template",
+      "template": false
     },
     {
-      "source": "implementation/web/templates/index.html.template",
       "destination": "components/web-host/web/templates/index.html.template",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/templates/index.html.template",
+      "template": false
     },
     {
-      "source": "implementation/web/templates/manifest.webmanifest.template",
       "destination": "components/web-host/web/templates/manifest.webmanifest.template",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/templates/manifest.webmanifest.template",
+      "template": false
     },
     {
-      "source": "implementation/web/templates/vite.config.ts.template",
       "destination": "components/web-host/web/templates/vite.config.ts.template",
-      "template": false,
-      "executable": false
+      "executable": false,
+      "source": "implementation/web/templates/vite.config.ts.template",
+      "template": false
     }
   ],
-  "dependencies": [],
-  "provides": [
-    {
-      "id": "web-shell",
-      "type": "ae/web-shell",
-      "version": "1.0.0",
-      "path": "interfaces/web-shell.json"
-    }
-  ],
-  "requires": [
-    {
-      "id": "theme",
-      "type": "ae/theme",
-      "version": "1.0.0",
-      "path": "interfaces/required/theme.json"
-    }
-  ],
-  "visual": {
-    "definition": "visual/definition.json",
-    "examples": [
-      "visual/examples/connected.json"
-    ],
-    "outputs": [
-      "visual/output/connected.svg",
-      "visual/output/connected.png"
-    ],
-    "descriptions": [
-      "visual/output/description.md"
-    ]
-  },
   "capabilities": {
     "hosts": [],
     "secrets": [],
@@ -274,41 +63,256 @@
       "components/web-host/web/templates/vite.config.ts.template"
     ]
   },
+  "collect": [
+    {
+      "grammar": "slug",
+      "id": "applicationId",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "grammar": "label",
+      "id": "applicationName",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "grammar": "label",
+      "id": "shortName",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "grammar": "identifier",
+      "id": "themeColour",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "grammar": "identifier",
+      "id": "backgroundColour",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "default": "icon",
+      "grammar": "slug",
+      "id": "iconPath",
+      "required": false,
+      "secret": false,
+      "type": "string"
+    },
+    {
+      "grammar": "address",
+      "id": "webAddress",
+      "required": true,
+      "secret": false,
+      "type": "string"
+    }
+  ],
+  "dependencies": [],
+  "documents": {
+    "contract": "CONTRACT.md",
+    "examples": [
+      "examples/consumer.ts"
+    ],
+    "interfaces": [
+      "interfaces/required-theme.json",
+      "interfaces/web-shell.json",
+      "suitability.json"
+    ],
+    "licenceNotice": "LICENCE"
+  },
+  "facilities": [
+    {
+      "description": "Installable web application shell",
+      "id": "web-shell"
+    }
+  ],
+  "files": [
+    {
+      "executable": false,
+      "path": "CONTRACT.md"
+    },
+    {
+      "executable": false,
+      "path": "INSTRUCTIONS.md"
+    },
+    {
+      "executable": false,
+      "path": "LICENCE"
+    },
+    {
+      "executable": false,
+      "path": "NOTICE"
+    },
+    {
+      "executable": false,
+      "path": "SOURCE.md"
+    },
+    {
+      "executable": false,
+      "path": "examples/consumer.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/install-banner.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/public/sw.js"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/render.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/runtime.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/templates/_headers.template"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/templates/index.html.template"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/templates/manifest.webmanifest.template"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/templates/vite.config.ts.template"
+    },
+    {
+      "executable": false,
+      "path": "interfaces/required-theme.json"
+    },
+    {
+      "executable": false,
+      "path": "interfaces/web-shell.json"
+    },
+    {
+      "executable": false,
+      "path": "suitability.json"
+    },
+    {
+      "executable": false,
+      "path": "tests/fixtures/agents.json"
+    },
+    {
+      "executable": false,
+      "path": "tests/fixtures/settings.json"
+    },
+    {
+      "executable": false,
+      "path": "tests/web.test.ts"
+    },
+    {
+      "executable": false,
+      "path": "tools.lock.json"
+    },
+    {
+      "executable": false,
+      "path": "visual/definition.json"
+    },
+    {
+      "executable": false,
+      "path": "visual/examples/connected.json"
+    },
+    {
+      "executable": false,
+      "path": "visual/output/connected.png"
+    },
+    {
+      "executable": false,
+      "path": "visual/output/connected.svg"
+    },
+    {
+      "executable": false,
+      "path": "visual/output/description.md"
+    }
+  ],
+  "format": 1,
+  "identity": {
+    "licence": "Apache-2.0",
+    "name": "ourapps-ae/web-host",
+    "sourceRevision": "19905b75dbea89fbfd424d67fe26c81aaed0e018",
+    "sourceTreeDigest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "version": "0.4.0"
+  },
   "infrastructure": {
     "accounts": [],
     "costStatus": "unmeasured",
     "deployedReason": "No deployed service; injected resources and local library functions only."
   },
+  "kind": "component",
+  "provides": [
+    {
+      "id": "web-shell",
+      "path": "interfaces/web-shell.json",
+      "type": "ae/web-shell",
+      "version": "1.0.0"
+    }
+  ],
+  "requires": [
+    {
+      "id": "theme",
+      "path": "interfaces/required-theme.json",
+      "type": "ae/theme",
+      "version": "1.0.0"
+    }
+  ],
+  "upgrade": {
+    "migration": "files-only",
+    "policy": "patch"
+  },
   "verification": [
     {
-      "id": "web",
-      "root": "package",
       "argv": [
         "node",
         "--test",
         "tests/web.test.ts"
       ],
       "cwd": ".",
-      "prepare": [],
-      "tools": {
-        "node": "26.5.0"
-      },
+      "expectedExit": 0,
       "fixtures": [
         "tests/fixtures/agents.json",
         "tests/fixtures/settings.json"
       ],
+      "id": "web",
       "locks": [
         "tools.lock.json"
       ],
       "network": false,
-      "timeoutSeconds": 120,
-      "expectedExit": 0,
+      "prepare": [],
+      "requirements": [],
+      "root": "package",
       "scope": "required-local",
-      "requirements": []
+      "timeoutSeconds": 120,
+      "tools": {
+        "node": "26.5.0"
+      }
     }
   ],
-  "upgrade": {
-    "policy": "patch",
-    "migration": "files-only"
+  "visual": {
+    "definition": "visual/definition.json",
+    "descriptions": [
+      "visual/output/description.md"
+    ],
+    "examples": [
+      "visual/examples/connected.json"
+    ],
+    "outputs": [
+      "visual/output/connected.svg",
+      "visual/output/connected.png"
+    ]
   }
 }

@@ -3,7 +3,7 @@
 ## For the agent
 Select `ourapps-ae/web-host` when the recipe's targets include `web`. Connect the `theme` requirement to the theme component so colour names resolve. Pass the answers for application name, short name, colours, icon and web address as settings. Provide the 512 and 192 pixel icons in the application's `public/` folder.
 
-- Select package `ourapps-ae/web-host` version `0.3.0`.
+- Select package `ourapps-ae/web-host` version `0.4.0`.
 - Settings to configure:
   - `applicationId` (string, slug; required)
   - `applicationName` (string, label; required)
@@ -18,7 +18,7 @@ Select `ourapps-ae/web-host` when the recipe's targets include `web`. Connect th
 
 ## For the developer
 
-- Theme: the `theme` port is described in `interfaces/required/theme.json`; feed theme `colourTable` into the `colours` option of `renderShell`.
+- Theme: the `theme` port is described in `interfaces/required-theme.json` (the theme component's interface document); feed theme `colourTable` into the `colours` option of `renderShell`. The provided interface `interfaces/web-shell.json` is an OpenRPC 1.3.2 document.
 Supply the application's own `src/main.ts`, screens and the two icon files. Run `renderShell` as part of the build, then `vite build`. Serve `dist/` over https at the web address. Supply no accounts or keys to this component; the hosting account is configured where the files are published. To check installability open the deployed address in Chrome (Application panel, Manifest) or Safari (Share, Add to Home Screen).
 
 ## How to check

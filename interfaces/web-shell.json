@@ -1,64 +1,685 @@
 {
-  "id": "web-shell",
-  "type": "ae/web-shell",
-  "version": "1.0.0",
-  "operations": {
-    "validateSettings": {
-      "arguments": [
-        "settings:WebShellSettings",
-        "colours:Record<string,string>|undefined"
-      ],
-      "returns": "ResolvedSettings"
-    },
-    "resolveColour": {
-      "arguments": [
-        "name:string",
-        "value:string",
-        "colours:Record<string,string>|undefined"
-      ],
-      "returns": "string"
-    },
-    "renderShell": {
-      "arguments": [
-        "settings:WebShellSettings",
-        "options:RenderOptions|undefined"
-      ],
-      "returns": "Record<string,string>"
-    },
-    "writeShell": {
-      "arguments": [
-        "directory:string",
-        "files:Record<string,string>"
-      ],
-      "returns": "void"
-    },
-    "startShell": {
-      "arguments": [
-        "host:ShellHost",
-        "options:ShellOptions|undefined"
-      ],
-      "returns": "{serviceWorker:Promise<boolean>,removeBanner:()=>void}"
-    },
-    "startInstallBanner": {
-      "arguments": [
-        "host:BannerHost",
-        "options:BannerOptions|undefined"
-      ],
-      "returns": "()=>void"
-    },
-    "bannerKind": {
-      "arguments": [
-        "environment:BannerEnvironment",
-        "hasInstallPrompt:boolean"
-      ],
-      "returns": "none|install|safari|in-app|android"
+  "openrpc": "1.3.2",
+  "info": {
+    "title": "ae/web-shell",
+    "version": "1.0.0",
+    "description": "Installable web application shell (TypeScript modules web/render.ts, web/runtime.ts and web/install-banner.ts). Methods are exported functions called in-process; render functions run at build time under Node, startShell and browserHost in the browser.",
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
     }
   },
-  "types": {
-    "WebShellSettings": "{applicationId:slug,applicationName:label,shortName:label(max 12),themeColour:#rrggbb|themeColourName,backgroundColour:#rrggbb|themeColourName,iconPath:slug (base name: <iconPath>.png is 512 square, <iconPath>-192.png is 192 square, in public/),webAddress:address}",
-    "RenderOptions": "{colours?:Record<string,string>,description?:string,language?:string,entry?:string,body?:string}"
-  },
-  "requirements": {
-    "theme": "Colour names in themeColour and backgroundColour resolve through the colours map taken from the theme interface; #rrggbb values need no theme. The operations used are listed in interfaces/required/theme.json."
+  "methods": [
+    {
+      "name": "validateSettings",
+      "description": "Checks the settings against the collected grammars, resolves colour names through the colours table and derives the icon file names.",
+      "params": [
+        {
+          "name": "settings",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/WebShellSettings"
+          }
+        },
+        {
+          "name": "colours",
+          "description": "Theme colour table used for colour names.",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ColourTable"
+          }
+        }
+      ],
+      "result": {
+        "name": "resolved",
+        "schema": {
+          "$ref": "#/components/schemas/ResolvedSettings"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/SettingsError"
+        }
+      ]
+    },
+    {
+      "name": "resolveColour",
+      "description": "Returns value lower-cased when it is #rrggbb, else the colour named by value in colours.",
+      "params": [
+        {
+          "name": "name",
+          "required": true,
+          "schema": {
+            "type": "string",
+            "description": "Setting name used in the error message."
+          }
+        },
+        {
+          "name": "value",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "colours",
+          "description": "Theme colour table used for colour names.",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ColourTable"
+          }
+        }
+      ],
+      "result": {
+        "name": "colour",
+        "schema": {
+          "type": "string",
+          "description": "Lower-case #rrggbb.",
+          "pattern": "^#[0-9a-f]{6}$"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/SettingsError"
+        }
+      ]
+    },
+    {
+      "name": "renderShell",
+      "description": "Renders index.html, vite.config.ts, public/manifest.webmanifest, public/_headers and public/sw.js from the settings.",
+      "params": [
+        {
+          "name": "settings",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/WebShellSettings"
+          }
+        },
+        {
+          "name": "options",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/RenderOptions"
+          }
+        }
+      ],
+      "result": {
+        "name": "files",
+        "schema": {
+          "$ref": "#/components/schemas/ShellFiles"
+        }
+      },
+      "errors": [
+        {
+          "$ref": "#/components/errors/SettingsError"
+        }
+      ]
+    },
+    {
+      "name": "writeShell",
+      "description": "Writes each file under directory, creating folders as needed. Throws the file system's error when a write fails.",
+      "params": [
+        {
+          "name": "directory",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "name": "files",
+          "required": true,
+          "schema": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Relative path to file text."
+          }
+        }
+      ],
+      "result": {
+        "name": "none",
+        "description": "Returns nothing.",
+        "schema": {
+          "type": "null"
+        }
+      }
+    },
+    {
+      "name": "startShell",
+      "description": "Registers the service worker and starts the install banner; does neither when options.desktop is true.",
+      "params": [
+        {
+          "name": "host",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ShellHost"
+          }
+        },
+        {
+          "name": "options",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/ShellOptions"
+          }
+        }
+      ],
+      "result": {
+        "name": "handle",
+        "schema": {
+          "$ref": "#/components/schemas/ShellHandle"
+        }
+      }
+    },
+    {
+      "name": "browserHost",
+      "description": "The browser's own window, navigator, localStorage and document as a ShellHost.",
+      "params": [],
+      "result": {
+        "name": "host",
+        "schema": {
+          "$ref": "#/components/schemas/ShellHost"
+        }
+      }
+    },
+    {
+      "name": "startInstallBanner",
+      "description": "Listens for install prompts and shows the add-to-home-screen banner when it applies. Returns a function () => void that removes the banner.",
+      "params": [
+        {
+          "name": "host",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BannerHost"
+          }
+        },
+        {
+          "name": "options",
+          "required": false,
+          "schema": {
+            "$ref": "#/components/schemas/BannerOptions"
+          }
+        }
+      ],
+      "result": {
+        "name": "remove",
+        "schema": {
+          "description": "Function () => void."
+        }
+      }
+    },
+    {
+      "name": "bannerKind",
+      "description": "Which banner applies: none when installed or dismissed within three days, install when the browser offered a prompt, safari, in-app (other iPhone browser shells), android, else none.",
+      "params": [
+        {
+          "name": "environment",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/BannerEnvironment"
+          }
+        },
+        {
+          "name": "hasInstallPrompt",
+          "required": true,
+          "schema": {
+            "type": "boolean"
+          }
+        }
+      ],
+      "result": {
+        "name": "kind",
+        "schema": {
+          "$ref": "#/components/schemas/BannerKind"
+        }
+      }
+    }
+  ],
+  "components": {
+    "schemas": {
+      "WebShellSettings": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "description": "Application identifier (slug).",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "applicationName": {
+            "type": "string",
+            "description": "Full application name (label).",
+            "pattern": "^[A-Za-z][A-Za-z0-9 -]{0,63}$"
+          },
+          "shortName": {
+            "type": "string",
+            "description": "Name under the home screen icon (label, at most 12 characters).",
+            "pattern": "^[A-Za-z][A-Za-z0-9 -]{0,63}$",
+            "maxLength": 12
+          },
+          "themeColour": {
+            "description": "Browser interface colour.",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Colour as #rrggbb.",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "description": "Name of a colour in the colours table.",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"
+              }
+            ]
+          },
+          "backgroundColour": {
+            "description": "Splash screen background colour.",
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "Colour as #rrggbb.",
+                "pattern": "^#[0-9a-fA-F]{6}$"
+              },
+              {
+                "type": "string",
+                "description": "Name of a colour in the colours table.",
+                "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"
+              }
+            ]
+          },
+          "iconPath": {
+            "type": "string",
+            "description": "Icon base name in public/: <iconPath>.png is 512 pixels square, <iconPath>-192.png is 192 pixels square.",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "webAddress": {
+            "type": "string",
+            "description": "Address the application is served from (address grammar).",
+            "pattern": "^https?://[A-Za-z0-9.-]+(:[0-9]{1,5})?(/[A-Za-z0-9_/-]*)?$"
+          }
+        },
+        "required": [
+          "applicationId",
+          "applicationName",
+          "shortName",
+          "themeColour",
+          "backgroundColour",
+          "iconPath",
+          "webAddress"
+        ],
+        "additionalProperties": false
+      },
+      "ResolvedSettings": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "applicationName": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9 -]{0,63}$"
+          },
+          "shortName": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9 -]{0,63}$",
+            "maxLength": 12
+          },
+          "themeColour": {
+            "type": "string",
+            "description": "Lower-case #rrggbb.",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "backgroundColour": {
+            "type": "string",
+            "description": "Lower-case #rrggbb.",
+            "pattern": "^#[0-9a-f]{6}$"
+          },
+          "iconPath": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,63}$"
+          },
+          "webAddress": {
+            "type": "string",
+            "description": "The web address with exactly one trailing slash.",
+            "pattern": "/$"
+          },
+          "icon192": {
+            "type": "string",
+            "description": "<iconPath>-192.png"
+          },
+          "icon512": {
+            "type": "string",
+            "description": "<iconPath>.png"
+          }
+        },
+        "required": [
+          "applicationId",
+          "applicationName",
+          "shortName",
+          "themeColour",
+          "backgroundColour",
+          "iconPath",
+          "webAddress",
+          "icon192",
+          "icon512"
+        ],
+        "additionalProperties": false
+      },
+      "ColourTable": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$"
+        },
+        "description": "Theme colour name to #rrggbb, from the theme interface's colourTable."
+      },
+      "RenderOptions": {
+        "type": "object",
+        "properties": {
+          "colours": {
+            "$ref": "#/components/schemas/ColourTable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Manifest description; defaults to applicationName."
+          },
+          "language": {
+            "type": "string",
+            "description": "Page language tag; defaults to en.",
+            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+          },
+          "entry": {
+            "type": "string",
+            "description": "Module the page starts from; defaults to /src/main.ts.",
+            "pattern": "^[A-Za-z0-9_./-]+$"
+          },
+          "body": {
+            "type": "string",
+            "description": "Markup placed inside <body>; defaults to <div id=\"app\"></div>."
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "ShellFiles": {
+        "type": "object",
+        "properties": {
+          "index.html": {
+            "type": "string"
+          },
+          "vite.config.ts": {
+            "type": "string"
+          },
+          "public/manifest.webmanifest": {
+            "type": "string"
+          },
+          "public/_headers": {
+            "type": "string"
+          },
+          "public/sw.js": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "index.html",
+          "vite.config.ts",
+          "public/manifest.webmanifest",
+          "public/_headers",
+          "public/sw.js"
+        ],
+        "additionalProperties": false,
+        "description": "Output path relative to the web project to file text."
+      },
+      "BannerKind": {
+        "type": "string",
+        "enum": [
+          "none",
+          "install",
+          "safari",
+          "in-app",
+          "android"
+        ]
+      },
+      "BannerEnvironment": {
+        "type": "object",
+        "properties": {
+          "userAgent": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "maxTouchPoints": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "installed": {
+            "type": "boolean",
+            "description": "True when the page already runs from the home screen."
+          },
+          "now": {
+            "type": "number",
+            "description": "Current time in milliseconds since the epoch."
+          },
+          "dismissedAt": {
+            "type": "number",
+            "description": "Time the banner was last dismissed, milliseconds since the epoch; 0 when never."
+          }
+        },
+        "required": [
+          "userAgent",
+          "platform",
+          "maxTouchPoints",
+          "installed",
+          "now",
+          "dismissedAt"
+        ],
+        "additionalProperties": false
+      },
+      "BannerText": {
+        "type": "object",
+        "properties": {
+          "install": {
+            "description": "Function (name: string) => string."
+          },
+          "safari": {
+            "description": "Function (name: string) => string."
+          },
+          "inApp": {
+            "description": "Function (name: string) => string."
+          },
+          "android": {
+            "description": "Function (name: string) => string."
+          },
+          "addButton": {
+            "type": "string"
+          },
+          "closeLabel": {
+            "type": "string"
+          },
+          "dialogLabel": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "install",
+          "safari",
+          "inApp",
+          "android",
+          "addButton",
+          "closeLabel",
+          "dialogLabel"
+        ],
+        "additionalProperties": false,
+        "description": "Banner wording; the name passed in is already escaped."
+      },
+      "BannerOptions": {
+        "type": "object",
+        "properties": {
+          "storageKey": {
+            "type": "string",
+            "description": "localStorage key holding the dismissal time; defaults to install-banner-dismissed."
+          },
+          "applicationName": {
+            "type": "string",
+            "description": "Name shown in the banner; defaults to the page's application-name meta, then its title."
+          },
+          "text": {
+            "$ref": "#/components/schemas/BannerText"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "BannerHost": {
+        "type": "object",
+        "description": "The parts of the browser the banner uses, so it can run against a fake.",
+        "required": [
+          "matchMedia",
+          "navigator",
+          "localStorage",
+          "document",
+          "addEventListener",
+          "now"
+        ],
+        "properties": {
+          "matchMedia": {
+            "description": "Function (query: string) => { matches: boolean }."
+          },
+          "navigator": {
+            "type": "object",
+            "properties": {
+              "userAgent": {
+                "type": "string"
+              },
+              "platform": {
+                "type": "string"
+              },
+              "maxTouchPoints": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "standalone": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "userAgent",
+              "platform",
+              "maxTouchPoints"
+            ],
+            "additionalProperties": true
+          },
+          "localStorage": {
+            "type": "object",
+            "properties": {
+              "getItem": {
+                "description": "Function (key: string) => string | null."
+              },
+              "setItem": {
+                "description": "Function (key: string, value: string) => void."
+              }
+            },
+            "required": [
+              "getItem",
+              "setItem"
+            ],
+            "additionalProperties": true
+          },
+          "document": {
+            "type": "object",
+            "properties": {
+              "readyState": {
+                "type": "string"
+              },
+              "body": {
+                "description": "Object with appendChild(node), or null before the body exists."
+              },
+              "title": {
+                "type": "string"
+              },
+              "querySelector": {
+                "description": "Function (selector: string) => { content?: string } | null."
+              },
+              "createElement": {
+                "description": "Function (tag: string) => element with setAttribute, optional attachShadow({mode}), parentNode, innerHTML and addEventListener."
+              },
+              "addEventListener": {
+                "description": "Function (type: string, listener: () => void) => void."
+              }
+            },
+            "required": [
+              "readyState",
+              "body",
+              "title",
+              "querySelector",
+              "createElement",
+              "addEventListener"
+            ],
+            "additionalProperties": true
+          },
+          "addEventListener": {
+            "description": "Function (type: string, listener: (event) => void) => void; receives beforeinstallprompt and appinstalled."
+          },
+          "now": {
+            "description": "Function () => number (milliseconds since the epoch)."
+          }
+        }
+      },
+      "ShellHost": {
+        "description": "A BannerHost whose navigator may also carry serviceWorker.register(url): Promise.",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BannerHost"
+          }
+        ]
+      },
+      "ShellOptions": {
+        "type": "object",
+        "properties": {
+          "desktop": {
+            "type": "boolean",
+            "description": "True inside the desktop wrapper, which neither installs nor registers a service worker."
+          },
+          "serviceWorkerUrl": {
+            "type": "string",
+            "description": "Service worker address; defaults to ./sw.js."
+          },
+          "banner": {
+            "$ref": "#/components/schemas/BannerOptions"
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "ShellHandle": {
+        "type": "object",
+        "properties": {
+          "serviceWorker": {
+            "type": "boolean",
+            "description": "A promise of this value: true when the service worker registered, false when it did not or was skipped."
+          },
+          "removeBanner": {
+            "description": "Function () => void that removes the banner."
+          }
+        },
+        "required": [
+          "serviceWorker",
+          "removeBanner"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "errors": {
+      "SettingsError": {
+        "code": 1,
+        "message": "SettingsError",
+        "data": {
+          "type": "string",
+          "description": "Names the setting or option that broke its grammar."
+        }
+      }
+    }
   }
 }
