@@ -25,27 +25,15 @@
       "template": false
     },
     {
-      "destination": "components/web-host/web/templates/_headers.template",
+      "destination": "components/web-host/web/settings.ts",
       "executable": false,
-      "source": "implementation/web/templates/_headers.template",
-      "template": false
+      "source": "implementation/web/settings.ts",
+      "template": true
     },
     {
-      "destination": "components/web-host/web/templates/index.html.template",
+      "destination": "components/web-host/web/vite.ts",
       "executable": false,
-      "source": "implementation/web/templates/index.html.template",
-      "template": false
-    },
-    {
-      "destination": "components/web-host/web/templates/manifest.webmanifest.template",
-      "executable": false,
-      "source": "implementation/web/templates/manifest.webmanifest.template",
-      "template": false
-    },
-    {
-      "destination": "components/web-host/web/templates/vite.config.ts.template",
-      "executable": false,
-      "source": "implementation/web/templates/vite.config.ts.template",
+      "source": "implementation/web/vite.ts",
       "template": false
     }
   ],
@@ -57,10 +45,8 @@
       "components/web-host/web/public/sw.js",
       "components/web-host/web/render.ts",
       "components/web-host/web/runtime.ts",
-      "components/web-host/web/templates/_headers.template",
-      "components/web-host/web/templates/index.html.template",
-      "components/web-host/web/templates/manifest.webmanifest.template",
-      "components/web-host/web/templates/vite.config.ts.template"
+      "components/web-host/web/settings.ts",
+      "components/web-host/web/vite.ts"
     ]
   },
   "collect": [
@@ -177,19 +163,11 @@
     },
     {
       "executable": false,
-      "path": "implementation/web/templates/_headers.template"
+      "path": "implementation/web/settings.ts"
     },
     {
       "executable": false,
-      "path": "implementation/web/templates/index.html.template"
-    },
-    {
-      "executable": false,
-      "path": "implementation/web/templates/manifest.webmanifest.template"
-    },
-    {
-      "executable": false,
-      "path": "implementation/web/templates/vite.config.ts.template"
+      "path": "implementation/web/vite.ts"
     },
     {
       "executable": false,

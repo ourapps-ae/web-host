@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
 import vm from "node:vm";
-import { renderShell, validateSettings, resolveColour, fill, SettingsError } from "../implementation/web/render.ts";
+import { headTags, renderHeaders, renderManifest, validateSettings, resolveColour, SettingsError } from "../implementation/web/render.ts";
+import { webHostConfig } from "../implementation/web/vite.ts";
 import { bannerKind, bannerMarkup, startInstallBanner, DISMISS_MILLISECONDS } from "../implementation/web/install-banner.ts";
 import { startShell } from "../implementation/web/runtime.ts";
-import { buildShell } from "../examples/consumer.ts";
+import { shellConfig } from "../examples/consumer.ts";
 
 const fixture = JSON.parse(readFileSync(new URL("fixtures/settings.json", import.meta.url), "utf8"));
 const agents = JSON.parse(readFileSync(new URL("fixtures/agents.json", import.meta.url), "utf8"));
@@ -14,9 +14,16 @@ const { settings, colours } = fixture;
 const now = 1_800_000_000_000;
 const fresh = (agent: string, extra = {}) => ({ ...agents[agent], installed: false, now, dismissedAt: 0, ...extra });
 
+const resolved = validateSettings(settings, colours);
+const shell = (mode = "production") => webHostConfig({ mode, root: "/application/web", settings, colours, description: "Cards with friends" });
+const emitted = (config: ReturnType<typeof shell>) => {
+  const files: Record<string, string> = {};
+  (config.plugins[0].generateBundle as (this: unknown) => void).call({ emitFile: (file: { fileName: string; source: string }) => { files[file.fileName] = file.source; return file.fileName; } });
+  return files;
+};
+
 test("manifest carries the settings and parses as JSON", () => {
-  const files = renderShell(settings, { colours });
-  const manifest = JSON.parse(files["public/manifest.webmanifest"]);
+  const manifest = JSON.parse(renderManifest(resolved));
   assert.equal(manifest.name, "OurPoker");
   assert.equal(manifest.short_name, "OurPoker");
   assert.equal(manifest.theme_color, "#120a10");
@@ -27,27 +34,65 @@ test("manifest carries the settings and parses as JSON", () => {
   assert.deepEqual(manifest.icons.map((icon: { src: string }) => icon.src), ["icon-192.png", "icon.png"]);
 });
 
-test("index page names the application, colour, icon and entry, and leaves no token behind", () => {
-  const files = renderShell(settings, { colours, language: "fr", entry: "/src/start.ts" });
-  const html = files["index.html"];
-  assert.match(html, /<html lang="fr">/);
-  assert.match(html, /<meta name="theme-color" content="#120a10" \/>/);
-  assert.match(html, /<title>OurPoker<\/title>/);
-  assert.match(html, /<link rel="apple-touch-icon" href="icon.png" \/>/);
-  assert.match(html, /<script type="module" src="\/src\/start.ts"><\/script>/);
-  assert.match(html, /<div id="app"><\/div>/);
-  for (const text of Object.values(files)) assert.doesNotMatch(text, /\{\{|\}\}/);
+test("the page head names the application, colour and icons, and links the manifest only where installable", () => {
+  const tags = headTags(resolved);
+  assert.deepEqual(tags[0], { tag: "meta", attrs: { charset: "UTF-8" }, injectTo: "head-prepend" });
+  assert.ok(tags.some((tag) => tag.tag === "meta" && tag.attrs?.name === "theme-color" && tag.attrs.content === "#120a10"));
+  assert.ok(tags.some((tag) => tag.tag === "title" && tag.children === "OurPoker"));
+  assert.ok(tags.some((tag) => tag.tag === "link" && tag.attrs?.rel === "apple-touch-icon" && tag.attrs.href === "icon.png"));
+  assert.ok(tags.some((tag) => tag.attrs?.rel === "manifest"));
+  assert.ok(!headTags(resolved, false).some((tag) => tag.attrs?.rel === "manifest"));
 });
 
-test("vite configuration is rendered with the application id and keeps the desktop switch", () => {
-  const config = renderShell(settings, { colours })["vite.config.ts"];
-  assert.match(config, /VITE_APPLICATION_ID": JSON.stringify\("ourpoker"\)/);
-  assert.match(config, /dist-desktop/);
-  assert.match(config, /webOnly = \["sw.js", "manifest.webmanifest"\]/);
+test("the Vite configuration injects the head and emits the manifest, service worker and headers", () => {
+  const config = shell();
+  assert.equal(config.base, "./");
+  assert.equal(config.build.outDir, "dist");
+  assert.deepEqual(config.server.fs.allow, ["/application"]);
+  assert.equal(config.define["import.meta.env.VITE_APPLICATION_ID"], JSON.stringify("ourpoker"));
+  assert.equal(config.define["import.meta.env.VITE_DESKTOP"], JSON.stringify("0"));
+  const page = config.plugins[0].transformIndexHtml.handler("<html><head></head><body></body></html>");
+  assert.deepEqual(page.tags, headTags(resolved));
+  const files = emitted(config);
+  assert.deepEqual(Object.keys(files).sort(), ["_headers", "manifest.webmanifest", "sw.js"]);
+  assert.equal(JSON.parse(files["manifest.webmanifest"]).description, "Cards with friends");
+  assert.equal(files["sw.js"], readFileSync(new URL("../implementation/web/public/sw.js", import.meta.url), "utf8"));
+  assert.equal(files["_headers"], renderHeaders());
+});
+
+test("the desktop build has the head without the manifest and emits no installable files", () => {
+  const config = shell("desktop");
+  assert.equal(config.build.outDir, "dist-desktop");
+  assert.equal(config.define["import.meta.env.VITE_DESKTOP"], JSON.stringify("1"));
+  assert.ok(!config.plugins[0].transformIndexHtml.handler("").tags.some((tag) => tag.attrs?.rel === "manifest"));
+  assert.deepEqual(emitted(config), {});
+});
+
+test("the development server answers the manifest and service worker", () => {
+  let handler: ((request: { url?: string }, response: { setHeader(n: string, v: string): void; end(b: string): void }, next: () => void) => void) | null = null;
+  shell().plugins[0].configureServer({ middlewares: { use: (fn) => { handler = fn; } } });
+  const answer = (url: string) => {
+    const result = { type: "", body: "", next: false };
+    handler!({ url }, { setHeader: (_name, value) => { result.type = value; }, end: (body) => { result.body = body; } }, () => { result.next = true; });
+    return result;
+  };
+  assert.equal(answer("/manifest.webmanifest?v=1").type, "application/manifest+json");
+  assert.match(answer("/sw.js").body, /skipWaiting/);
+  assert.equal(answer("/src/main.ts").next, true);
 });
 
 test("headers keep the application out of search results", () => {
-  assert.equal(renderShell(settings, { colours })["public/_headers"], "/*\n  X-Robots-Tag: noindex\n");
+  assert.equal(renderHeaders(), "/*\n  X-Robots-Tag: noindex\n");
+});
+
+test("settings.ts is rendered by aepm at install from every setting, each in a quoted string", { skip: !existsSync(new URL("../component.json", import.meta.url)) && "component.json is not in this copy" }, () => {
+  const manifest = JSON.parse(readFileSync(new URL("../component.json", import.meta.url), "utf8"));
+  assert.deepEqual(manifest.artefacts.find((item: { source: string }) => item.source === "implementation/web/settings.ts"),
+    { source: "implementation/web/settings.ts", destination: "components/web-host/web/settings.ts", template: true, executable: false });
+  const text = readFileSync(new URL("../implementation/web/settings.ts", import.meta.url), "utf8");
+  const tokens = [...text.matchAll(/"\{\{([A-Za-z]+)\}\}"/g)].map((match) => match[1]);
+  assert.deepEqual(tokens, manifest.collect.map((item: { id: string }) => item.id));
+  assert.equal([...text.matchAll(/\{\{/g)].length, tokens.length);
 });
 
 test("invalid settings are refused", () => {
@@ -66,12 +111,6 @@ test("colours are #rrggbb or a theme colour name", () => {
   assert.equal(resolveColour("c", "midnight", colours), "#120a10");
   assert.throws(() => resolveColour("c", "midnight"), SettingsError);
   assert.throws(() => resolveColour("c", "constructor", {}), SettingsError);
-});
-
-test("templates escape by context and refuse unknown or malformed tokens", () => {
-  assert.equal(fill('<a title="{{x:html}}">{{y:json}}</a>', { x: 'a"<b>&', y: 'q"' }), '<a title="a&quot;&lt;b&gt;&amp;">"q\\""</a>');
-  assert.throws(() => fill("{{missing}}", {}), SettingsError);
-  assert.throws(() => fill("{{ spaced }}", {}), SettingsError);
 });
 
 test("service worker takes control at once and does not cache", () => {
@@ -201,9 +240,8 @@ test("shell start registers the service worker, and the desktop wrapper does nei
   assert.equal(await startShell(fakeBrowser("androidChrome").host).serviceWorker, false);
 });
 
-test("consumer writes the shell files to disk", () => {
-  const built = buildShell(settings, colours);
-  assert.deepEqual(built.files, ["index.html", "public/_headers", "public/manifest.webmanifest", "public/sw.js", "vite.config.ts"]);
-  assert.deepEqual(readdirSync(join(built.directory, "public")).sort(), ["_headers", "manifest.webmanifest", "sw.js"]);
-  assert.equal(JSON.parse(readFileSync(join(built.directory, "public/manifest.webmanifest"), "utf8")).name, "OurPoker");
+test("consumer builds the shell configuration with the theme's colours", () => {
+  const config = shellConfig(settings, colours);
+  assert.equal(config.build.outDir, "dist");
+  assert.deepEqual(Object.keys(emitted(config)).sort(), ["_headers", "manifest.webmanifest", "sw.js"]);
 });

@@ -3,7 +3,7 @@
   "info": {
     "title": "ae/web-shell",
     "version": "1.0.0",
-    "description": "Installable web application shell (TypeScript modules web/render.ts, web/runtime.ts and web/install-banner.ts). Methods are exported functions called in-process; render functions run at build time under Node, startShell and browserHost in the browser.",
+    "description": "Installable web application shell (TypeScript modules web/render.ts, web/vite.ts, web/runtime.ts and web/install-banner.ts; web/settings.ts holds the settings aepm renders at install). Methods are exported functions called in-process; render and Vite configuration functions run at build time under Node, startShell and browserHost in the browser.",
     "license": {
       "name": "Apache-2.0",
       "url": "https://www.apache.org/licenses/LICENSE-2.0"
@@ -85,28 +85,88 @@
       ]
     },
     {
-      "name": "renderShell",
-      "description": "Renders index.html, vite.config.ts, public/manifest.webmanifest, public/_headers and public/sw.js from the settings.",
+      "name": "renderManifest",
+      "description": "The web app manifest (manifest.webmanifest) for the resolved settings, as JSON text.",
       "params": [
         {
           "name": "settings",
           "required": true,
           "schema": {
-            "$ref": "#/components/schemas/WebShellSettings"
+            "$ref": "#/components/schemas/ResolvedSettings"
           }
         },
         {
           "name": "options",
           "required": false,
           "schema": {
-            "$ref": "#/components/schemas/RenderOptions"
+            "$ref": "#/components/schemas/ShellOptions"
           }
         }
       ],
       "result": {
-        "name": "files",
+        "name": "manifest",
         "schema": {
-          "$ref": "#/components/schemas/ShellFiles"
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "renderHeaders",
+      "description": "The static host's _headers file: keeps the application out of search results.",
+      "params": [],
+      "result": {
+        "name": "headers",
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
+    {
+      "name": "headTags",
+      "description": "The page head: character set, viewport, colours, names, icons and, when installable, the manifest link, as Vite tag descriptors.",
+      "params": [
+        {
+          "name": "settings",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/ResolvedSettings"
+          }
+        },
+        {
+          "name": "installable",
+          "required": false,
+          "schema": {
+            "type": "boolean",
+            "description": "Defaults to true; false for the desktop build."
+          }
+        }
+      ],
+      "result": {
+        "name": "tags",
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/HeadTag"
+          }
+        }
+      }
+    },
+    {
+      "name": "webHostConfig",
+      "description": "The Vite configuration the application's vite.config.ts returns: relative base, the desktop switch, the application id, and a plugin that injects the head and, for the web build, emits manifest.webmanifest, sw.js and _headers (served by the development server too).",
+      "params": [
+        {
+          "name": "options",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/WebHostOptions"
+          }
+        }
+      ],
+      "result": {
+        "name": "config",
+        "schema": {
+          "$ref": "#/components/schemas/WebHostConfig"
         }
       },
       "errors": [
@@ -114,37 +174,6 @@
           "$ref": "#/components/errors/SettingsError"
         }
       ]
-    },
-    {
-      "name": "writeShell",
-      "description": "Writes each file under directory, creating folders as needed. Throws the file system's error when a write fails.",
-      "params": [
-        {
-          "name": "directory",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "name": "files",
-          "required": true,
-          "schema": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Relative path to file text."
-          }
-        }
-      ],
-      "result": {
-        "name": "none",
-        "description": "Returns nothing.",
-        "schema": {
-          "type": "null"
-        }
-      }
     },
     {
       "name": "startShell",
@@ -374,63 +403,6 @@
         },
         "description": "Theme colour name to #rrggbb, from the theme interface's colourTable."
       },
-      "RenderOptions": {
-        "type": "object",
-        "properties": {
-          "colours": {
-            "$ref": "#/components/schemas/ColourTable"
-          },
-          "description": {
-            "type": "string",
-            "description": "Manifest description; defaults to applicationName."
-          },
-          "language": {
-            "type": "string",
-            "description": "Page language tag; defaults to en.",
-            "pattern": "^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
-          },
-          "entry": {
-            "type": "string",
-            "description": "Module the page starts from; defaults to /src/main.ts.",
-            "pattern": "^[A-Za-z0-9_./-]+$"
-          },
-          "body": {
-            "type": "string",
-            "description": "Markup placed inside <body>; defaults to <div id=\"app\"></div>."
-          }
-        },
-        "required": [],
-        "additionalProperties": false
-      },
-      "ShellFiles": {
-        "type": "object",
-        "properties": {
-          "index.html": {
-            "type": "string"
-          },
-          "vite.config.ts": {
-            "type": "string"
-          },
-          "public/manifest.webmanifest": {
-            "type": "string"
-          },
-          "public/_headers": {
-            "type": "string"
-          },
-          "public/sw.js": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "index.html",
-          "vite.config.ts",
-          "public/manifest.webmanifest",
-          "public/_headers",
-          "public/sw.js"
-        ],
-        "additionalProperties": false,
-        "description": "Output path relative to the web project to file text."
-      },
       "BannerKind": {
         "type": "string",
         "enum": [
@@ -638,16 +610,12 @@
       "ShellOptions": {
         "type": "object",
         "properties": {
-          "desktop": {
-            "type": "boolean",
-            "description": "True inside the desktop wrapper, which neither installs nor registers a service worker."
+          "colours": {
+            "$ref": "#/components/schemas/ColourTable"
           },
-          "serviceWorkerUrl": {
+          "description": {
             "type": "string",
-            "description": "Service worker address; defaults to ./sw.js."
-          },
-          "banner": {
-            "$ref": "#/components/schemas/BannerOptions"
+            "description": "Manifest description; defaults to applicationName."
           }
         },
         "required": [],
@@ -669,6 +637,100 @@
           "removeBanner"
         ],
         "additionalProperties": false
+      },
+      "HeadTag": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string"
+          },
+          "attrs": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "children": {
+            "type": "string"
+          },
+          "injectTo": {
+            "type": "string",
+            "enum": [
+              "head-prepend",
+              "head"
+            ]
+          }
+        },
+        "required": [
+          "tag",
+          "injectTo"
+        ],
+        "additionalProperties": false
+      },
+      "WebHostOptions": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "Vite's mode; \"desktop\" (or VITE_DESKTOP=1) builds the desktop variant into dist-desktop."
+          },
+          "root": {
+            "type": "string",
+            "description": "The application's web folder; its parent is served too."
+          },
+          "settings": {
+            "$ref": "#/components/schemas/WebShellSettings"
+          },
+          "colours": {
+            "$ref": "#/components/schemas/ColourTable"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "root",
+          "settings"
+        ],
+        "additionalProperties": false
+      },
+      "WebHostConfig": {
+        "type": "object",
+        "description": "A Vite user configuration: base, root, server.fs.allow, define (VITE_DESKTOP, VITE_APPLICATION_ID), publicDir, build.outDir (dist or dist-desktop) and the web-host plugin.",
+        "properties": {
+          "base": {
+            "const": "./"
+          },
+          "root": {
+            "type": "string"
+          },
+          "publicDir": {
+            "type": "string"
+          },
+          "build": {
+            "type": "object"
+          },
+          "define": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "server": {
+            "type": "object"
+          },
+          "plugins": {
+            "type": "array"
+          }
+        },
+        "required": [
+          "base",
+          "root",
+          "build",
+          "define",
+          "plugins"
+        ]
       }
     },
     "errors": {

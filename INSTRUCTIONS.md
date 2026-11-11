@@ -18,8 +18,8 @@ Select `ourapps-ae/web-host` when the recipe's targets include `web`. Connect th
 
 ## For the developer
 
-- Theme: the `theme` port is described in `interfaces/required-theme.json` (the theme component's interface document); feed theme `colourTable` into the `colours` option of `renderShell`. The provided interface `interfaces/web-shell.json` is an OpenRPC 1.3.2 document.
-Supply the application's own `src/main.ts`, screens and the two icon files. Run `renderShell` as part of the build, then `vite build`. Serve `dist/` over https at the web address. Supply no accounts or keys to this component; the hosting account is configured where the files are published. To check installability open the deployed address in Chrome (Application panel, Manifest) or Safari (Share, Add to Home Screen).
+- Theme: the `theme` port is described in `interfaces/required-theme.json` (the theme component's interface document); feed theme `colourTable` into the `colours` option of `webHostConfig`. The provided interface `interfaces/web-shell.json` is an OpenRPC 1.3.2 document.
+Supply the application's own `index.html` (the body and `<script type="module" src="/src/main.ts">`), `src/main.ts`, screens and the two icon files in `public/`. Its `vite.config.ts` returns `webHostConfig({ mode, root, settings: webHostSettings, colours })` (`webHostSettings` from the installed `web/settings.ts`, which aepm renders). Then `vite build` (or `vite build --mode desktop` for the desktop wrapper). Serve `dist/` over https at the web address. Supply no accounts or keys to this component; the hosting account is configured where the files are published. To check installability open the deployed address in Chrome (Application panel, Manifest) or Safari (Share, Add to Home Screen).
 
 ## How to check
 From the component directory:

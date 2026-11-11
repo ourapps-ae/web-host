@@ -1,7 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-
-// Build-time rendering of the installable web shell files from typed settings.
+// The installable web shell's settings and the files and page head rendered from them at build time.
 
 export interface WebShellSettings {
   applicationId: string;
@@ -11,16 +8,6 @@ export interface WebShellSettings {
   backgroundColour: string;
   iconPath: string;
   webAddress: string;
-}
-
-export interface RenderOptions {
-  // Colour names from the theme component, used when a colour setting is a name rather than #rrggbb.
-  colours?: Record<string, string>;
-  description?: string;
-  language?: string;
-  // Module the page starts from, and the markup placed inside <body>.
-  entry?: string;
-  body?: string;
 }
 
 export class SettingsError extends Error {}
@@ -69,65 +56,59 @@ export function validateSettings(settings: WebShellSettings, colours: Record<str
   };
 }
 
-const ESCAPES: Record<string, (value: string) => string> = {
-  json: (value) => JSON.stringify(value),
-  html: (value) => value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;"),
-  raw: (value) => value,
-};
-
-// {{name}} inserts raw text; {{name:json}} and {{name:html}} escape for that context. Unknown names are errors.
-const TOKEN = /\{\{([A-Za-z][A-Za-z0-9]*)(?::(json|html))?\}\}/g;
-
-export function fill(template: string, values: Record<string, string>): string {
-  if (template.replace(TOKEN, "").includes("{{")) throw new SettingsError("template has a malformed token");
-  return template.replace(TOKEN, (_match, name: string, mode: string | undefined) => {
-    if (!Object.hasOwn(values, name)) throw new SettingsError(`template names unknown value ${name}`);
-    return ESCAPES[mode ?? "raw"](values[name]);
-  });
+export interface ShellOptions {
+  // Colour names from the theme component, used when a colour setting is a name rather than #rrggbb.
+  colours?: Record<string, string>;
+  description?: string;
 }
 
-function template(name: string): string {
-  return readFileSync(new URL(`./templates/${name}.template`, import.meta.url), "utf8");
+// One element for the page head, in the form Vite's transformIndexHtml takes.
+export interface HeadTag {
+  tag: string;
+  attrs?: Record<string, string>;
+  children?: string;
+  injectTo: "head-prepend" | "head";
 }
 
-export function renderManifest(settings: ResolvedSettings, options: RenderOptions = {}): string {
-  const text = fill(template("manifest.webmanifest"), { ...settings, description: options.description ?? settings.applicationName });
-  JSON.parse(text);
-  return text;
-}
-
-export function renderIndex(settings: ResolvedSettings, options: RenderOptions = {}): string {
-  const language = options.language ?? "en";
-  if (!/^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(language)) throw new SettingsError("language must be a language tag");
-  const entry = options.entry ?? "/src/main.ts";
-  if (!/^[A-Za-z0-9_./-]+$/.test(entry)) throw new SettingsError("entry must be a plain module path");
-  return fill(template("index.html"), { ...settings, language, entry, body: options.body ?? '    <div id="app"></div>' });
+export function renderManifest(settings: ResolvedSettings, options: ShellOptions = {}): string {
+  const manifest = {
+    id: settings.webAddress,
+    name: settings.applicationName,
+    short_name: settings.shortName,
+    description: options.description ?? settings.applicationName,
+    start_url: "./",
+    scope: "./",
+    display: "standalone",
+    background_color: settings.backgroundColour,
+    theme_color: settings.themeColour,
+    icons: [
+      { src: settings.icon192, sizes: "192x192", type: "image/png" },
+      { src: settings.icon512, sizes: "512x512", type: "image/png" },
+    ],
+  };
+  return JSON.stringify(manifest, null, 2) + "\n";
 }
 
 export function renderHeaders(): string {
-  return template("_headers");
+  return "/*\n  X-Robots-Tag: noindex\n";
 }
 
-export function renderViteConfig(settings: ResolvedSettings): string {
-  return fill(template("vite.config.ts"), { ...settings });
-}
-
-// Output path (relative to the web project) to file text.
-export function renderShell(settings: WebShellSettings, options: RenderOptions = {}): Record<string, string> {
-  const resolved = validateSettings(settings, options.colours);
-  return {
-    "index.html": renderIndex(resolved, options),
-    "vite.config.ts": renderViteConfig(resolved),
-    "public/manifest.webmanifest": renderManifest(resolved, options),
-    "public/_headers": renderHeaders(),
-    "public/sw.js": readFileSync(new URL("./public/sw.js", import.meta.url), "utf8"),
-  };
-}
-
-export function writeShell(directory: string, files: Record<string, string>): void {
-  for (const [path, text] of Object.entries(files)) {
-    const target = join(directory, path);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, text);
-  }
+// The head of the start page: character set, viewport, colours, names and icons; the manifest link only where the page is installable.
+export function headTags(settings: ResolvedSettings, installable = true): HeadTag[] {
+  const meta = (attrs: Record<string, string>): HeadTag => ({ tag: "meta", attrs, injectTo: "head" });
+  const tags: HeadTag[] = [
+    { tag: "meta", attrs: { charset: "UTF-8" }, injectTo: "head-prepend" },
+    meta({ name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" }),
+    meta({ name: "robots", content: "noindex, nofollow" }),
+    meta({ name: "theme-color", content: settings.themeColour }),
+    meta({ name: "application-name", content: settings.applicationName }),
+    meta({ name: "apple-mobile-web-app-capable", content: "yes" }),
+    meta({ name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" }),
+    meta({ name: "apple-mobile-web-app-title", content: settings.shortName }),
+    { tag: "title", children: settings.applicationName, injectTo: "head" },
+    { tag: "link", attrs: { rel: "icon", href: settings.icon512, type: "image/png" }, injectTo: "head" },
+    { tag: "link", attrs: { rel: "apple-touch-icon", href: settings.icon512 }, injectTo: "head" },
+  ];
+  if (installable) tags.push({ tag: "link", attrs: { rel: "manifest", href: "./manifest.webmanifest" }, injectTo: "head" });
+  return tags;
 }

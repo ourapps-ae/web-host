@@ -1,12 +1,12 @@
 # Web host component
 
 ## Purpose and facilities
-Turns a web application into an installable one: renders the web manifest, the start page, the response headers and the build configuration from typed settings, ships a service worker that makes the page installable without caching, and starts the shell in the browser with an add-to-home-screen banner. The application supplies its own screens through the entry module and the page body.
+Turns a web application into an installable one: gives the application's Vite build its configuration, which writes the page head, the web manifest, the response headers and a service worker that makes the page installable without caching, all from the installed settings, and starts the shell in the browser with an add-to-home-screen banner. The application supplies its own `index.html` (the page body and the entry module) and screens.
 
 Facilities: `web-shell` (Installable web application shell).
 
 ## User inputs
-The installer collects these settings. Colours are names of colours in the theme component (the collected setting grammar cannot carry #rrggbb); the render functions also accept #rrggbb when run outside the installer. `iconPath` names the icon files in the web `public/` folder: `<iconPath>.png` is 512 pixels square and `<iconPath>-192.png` is 192 pixels square.
+The installer collects these settings and renders them into `web/settings.ts` (`webHostSettings`). Colours are names of colours in the theme component (the collected setting grammar cannot carry #rrggbb), resolved through the colour table the application passes; the functions also accept #rrggbb when run outside the installer. `iconPath` names the icon files in the web `public/` folder: `<iconPath>.png` is 512 pixels square and `<iconPath>-192.png` is 192 pixels square.
 
 - `applicationId` (string, slug; required)
 - `applicationName` (string, label; required)
@@ -23,22 +23,20 @@ The installer collects these settings. Colours are names of colours in the theme
 - `implementation/web/public/sw.js` -> `components/web-host/web/public/sw.js`
 - `implementation/web/render.ts` -> `components/web-host/web/render.ts`
 - `implementation/web/runtime.ts` -> `components/web-host/web/runtime.ts`
-- `implementation/web/templates/_headers.template` -> `components/web-host/web/templates/_headers.template`
-- `implementation/web/templates/index.html.template` -> `components/web-host/web/templates/index.html.template`
-- `implementation/web/templates/manifest.webmanifest.template` -> `components/web-host/web/templates/manifest.webmanifest.template`
-- `implementation/web/templates/vite.config.ts.template` -> `components/web-host/web/templates/vite.config.ts.template`
+- `implementation/web/settings.ts` -> `components/web-host/web/settings.ts` (template: aepm renders it from the settings)
+- `implementation/web/vite.ts` -> `components/web-host/web/vite.ts`
 
 Dependencies: none.
 `tools.lock.json` pins verification tools: node 26.5.0. Licence wording remains deferred.
 
 ## Provided interfaces
-- `interfaces/web-shell.json` defines `web-shell` (ae/web-shell) version 1.0.0 as an OpenRPC 1.3.2 document: one method per exported function (`validateSettings`, `resolveColour`, `renderShell`, `writeShell`, `startShell`, `browserHost`, `startInstallBanner`, `bannerKind`), its parameters and result as JSON Schema 2020-12, and `SettingsError` where a setting breaks its grammar.
+- `interfaces/web-shell.json` defines `web-shell` (ae/web-shell) version 1.0.0 as an OpenRPC 1.3.2 document: one method per exported function (`validateSettings`, `resolveColour`, `renderManifest`, `renderHeaders`, `headTags`, `webHostConfig`, `startShell`, `browserHost`, `startInstallBanner`, `bannerKind`), its parameters and result as JSON Schema 2020-12, and `SettingsError` where a setting breaks its grammar.
 
 ## Required interfaces
 - `theme` (ae/theme) version 1.0.0, supplied by the recipe or application. `interfaces/required-theme.json` is a copy of the theme component's interface document; web-host uses its `colourTable` result (build time) for `themeColour` and `backgroundColour`.
 
 ## Integration
-At build time call `renderShell(settings, {colours})` from `web/render.ts` and write the result with `writeShell` (index.html, vite.config.ts, public/manifest.webmanifest, public/_headers, public/sw.js); `colours` is the colour table of the connected theme. In the application's main module call `startShell(browserHost(), {desktop})` from `web/runtime.ts` once; it registers `./sw.js` and starts the install banner, and does neither when `desktop` is true. The application keeps its own screens, art, strings and its `src/main.ts` entry. `examples/consumer.ts` does both steps without a game.
+The application's `vite.config.ts` returns `webHostConfig({ mode, root, settings: webHostSettings, colours })` from `web/vite.ts`, with `webHostSettings` from the installed `web/settings.ts` and `colours` the colour table of the connected theme; it may add its own fields (for example `resolve.alias`). The build then has the page head, and the web build `manifest.webmanifest`, `sw.js` and `_headers`; the desktop build (`--mode desktop`) has the head without the manifest link and writes `dist-desktop/`. The application's `index.html` holds the page body and `<script type="module" src="/src/main.ts">`. In the application's main module call `startShell(browserHost(), {desktop})` from `web/runtime.ts` once; it registers `./sw.js` and starts the install banner, and does neither when `desktop` is true. The application keeps its own screens, art, strings and its `src/main.ts` entry. `examples/consumer.ts` does both steps without a game.
 
 ## Visual definition and connected examples
 `visual/definition.json` maps its ports to the provided and required interfaces. `visual/examples/connected.json` connects the component to an illustrative application consumer. Both image formats and a text description are in `visual/output/`.
@@ -47,7 +45,7 @@ At build time call `renderShell(settings, {colours})` from `web/render.ts` and w
 No service is deployed by this package. The rendered files are static and need any static file host served over https at `webAddress`; the hosting account belongs to the release pipeline or the developer. Install prompts need https and a browser that supports installation.
 
 ## Verification
-`node --test tests/web.test.ts` renders the shell from fixture settings and checks the manifest, page, headers and build configuration, runs `sw.js` against a fake service worker scope, and drives the install banner against fake browsers for iPhone Safari, in-app iPhone browsers, iPadOS desktop mode, Android and desktop Chrome, including dismissal and installed state. Real browser installation was not exercised.
+`node --test tests/web.test.ts` checks the manifest, the page head (with and without the manifest link), the Vite configuration (head injection, emitted files, the desktop build, the development server's answers), the headers and the `settings.ts` template against the collected settings, runs `sw.js` against a fake service worker scope, and drives the install banner against fake browsers for iPhone Safari, in-app iPhone browsers, iPadOS desktop mode, Android and desktop Chrome, including dismissal and installed state. The OurPoker recipe's `authoring/try_install.py` builds a real application with it and loads the page in headless Chrome. Real browser installation was not exercised.
 
 - `node --test tests/web.test.ts` (web, required-local; tools: node 26.5.0)
 
