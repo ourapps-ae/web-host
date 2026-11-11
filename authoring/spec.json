@@ -1,6 +1,6 @@
 {
   "name": "web-host",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "title": "Web host",
   "description": "Installable web application shell: manifest, page, service worker, headers, build configuration and the install banner, rendered from typed settings.",
   "facilities": [
