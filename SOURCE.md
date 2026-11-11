@@ -1,6 +1,6 @@
 # Source mapping
 
-Reference revision: `19905b75dbea89fbfd424d67fe26c81aaed0e018`. Recipe paths are under `OurPoker/recipe/web/`; the install banner is not in the recipe and comes from the frozen McInPoker tree.
+Reference revision: `19905b75dbea89fbfd424d67fe26c81aaed0e018`. Recipe paths are under `recipe/web/` in `ourapps-ae/OurPoker`; the install banner is not in the recipe and comes from the frozen McInPoker tree (repository `george-mcintyre/mcinpoker`).
 
 - `public/sw.js` lines 1-4 -> `implementation/web/public/sw.js`: a copy.
 - `public/manifest.webmanifest` lines 1-14 -> `implementation/web/render.ts` `renderManifest`: name, short name, colours and icon names come from the settings; `id` from the web address is added; `start_url` and `scope` stay relative; the fixed description becomes an option defaulting to the application name.
@@ -9,7 +9,7 @@ Reference revision: `19905b75dbea89fbfd424d67fe26c81aaed0e018`. Recipe paths are
 - `public/_headers` lines 1-2 -> `implementation/web/render.ts` `renderHeaders`: the same two lines.
 - `implementation/web/settings.ts` is new: the template aepm renders at install from the seven settings, which the application's `vite.config.ts` passes to `webHostConfig`.
 - `src/main.ts` lines 120-121 (service worker registration, skipped in the desktop wrapper) -> `implementation/web/runtime.ts` `startShell`: registration result and failure are returned instead of ignored. The rest of `main.ts` (screens, store, video, update check, art) stays with the application.
-- `mcinpoker/web/public/install-banner.js` lines 1-85 (also `ourapps/worker/src/assets/install-banner.js`, byte-identical; recipe `vite.config.ts` lines 19-20 and 24 refer to it but the recipe has no copy) -> `implementation/web/install-banner.ts`, a TypeScript port of the same logic: the decision logic (`bannerKind`), markup (`bannerMarkup`) and behaviour (`startInstallBanner`) are separated so they run against a fake browser; the storage key and texts are options (English texts remain the defaults; the default key changed from `ourapps-install-dismissed` to `install-banner-dismissed`); `data-ourapps-install` became `data-install-banner`.
+- McInPoker `web/public/install-banner.js` lines 1-85 (also `worker/src/assets/install-banner.js` in `ourapps-ae/ourapps`, byte-identical; recipe `vite.config.ts` lines 19-20 and 24 refer to it but the recipe has no copy) -> `implementation/web/install-banner.ts`, a TypeScript port of the same logic: the decision logic (`bannerKind`), markup (`bannerMarkup`) and behaviour (`startInstallBanner`) are separated so they run against a fake browser; the storage key and texts are options (English texts remain the defaults; the default key changed from `ourapps-install-dismissed` to `install-banner-dismissed`); `data-ourapps-install` became `data-install-banner`.
 - Settings validation in `implementation/web/render.ts` (the aepm string grammars plus colours) is new; it has no recipe counterpart.
 
 Left behind: `wrangler.jsonc` and deployment (release pipeline), `package.json`, `tsconfig.json`, all screens and styles, the update check at `main.ts` lines 100-105, the art manifest, sounds and test scripts under `web/test/`.

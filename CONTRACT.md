@@ -27,7 +27,7 @@ The installer collects these settings and renders them into `web/settings.ts` (`
 - `implementation/web/vite.ts` -> `components/web-host/web/vite.ts`
 
 Dependencies: none.
-`tools.lock.json` pins verification tools: node 26.5.0. Licence wording remains deferred.
+`tools.lock.json` pins verification tools: node 26.5. Licence wording remains deferred.
 
 ## Provided interfaces
 - `interfaces/web-shell.json` defines `web-shell` (ae/web-shell) version 1.0.0 as an OpenRPC 1.3.2 document: one method per exported function (`validateSettings`, `resolveColour`, `renderManifest`, `renderHeaders`, `headTags`, `webHostConfig`, `startShell`, `browserHost`, `startInstallBanner`, `bannerKind`), its parameters and result as JSON Schema 2020-12, and `SettingsError` where a setting breaks its grammar.
@@ -47,7 +47,7 @@ No service is deployed by this package. The rendered files are static and need a
 ## Verification
 `node --test tests/web.test.ts` checks the manifest, the page head (with and without the manifest link), the Vite configuration (head injection, emitted files, the desktop build, the development server's answers), the headers and the `settings.ts` template against the collected settings, runs `sw.js` against a fake service worker scope, and drives the install banner against fake browsers for iPhone Safari, in-app iPhone browsers, iPadOS desktop mode, Android and desktop Chrome, including dismissal and installed state. The OurPoker recipe's `authoring/try_install.py` builds a real application with it and loads the page in headless Chrome. Real browser installation was not exercised.
 
-- `node --test tests/web.test.ts` (web, required-local; tools: node 26.5.0)
+- `node --test tests/web.test.ts` (web, required-local; tools: node 26.5)
 
 ## Scenarios and presentation
 Safari on iPhone shows the Share instructions; Chrome on Android or desktop shows a one-tap Add button; an application already on the home screen or dismissed within three days shows nothing; the desktop wrapper skips the service worker and banner.

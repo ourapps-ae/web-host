@@ -24,5 +24,5 @@ Supply the application's own `index.html` (the body and `<script type="module" s
 ## How to check
 From the component directory:
 
-- `node --test tests/web.test.ts` (web, required-local; tools: node 26.5.0)
-- `python3.12 -B /Users/george/Projects/com/my/tools/check_component.py components/web-host` validates the manifest, sidecars and runs the required-local suite.
+- `node --test tests/web.test.ts` (web, required-local; tools: node 26.5)
+- `python3 -m aepm review <digest> --store STORE --policy POLICY --trusted --allow-network` checks an archive fetched with `python3 -m aepm fetch ourapps-ae/web-host@VERSION --store STORE --from https://ourapps.app` and runs its suites.
