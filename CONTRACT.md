@@ -24,6 +24,7 @@ The installer collects these settings and renders them into `web/settings.ts` (`
 - `implementation/web/render.ts` -> `components/web-host/web/render.ts`
 - `implementation/web/runtime.ts` -> `components/web-host/web/runtime.ts`
 - `implementation/web/settings.ts` -> `components/web-host/web/settings.ts` (template: aepm renders it from the settings)
+- `implementation/web/package.json` -> `components/web-host/web/package.json` (marks the folder's modules as ES modules, so Vite loads them for the application's `vite.config.ts` without a warning)
 - `implementation/web/vite.ts` -> `components/web-host/web/vite.ts`
 
 Dependencies: none.
