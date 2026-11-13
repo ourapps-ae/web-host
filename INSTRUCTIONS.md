@@ -3,7 +3,7 @@
 ## For the agent
 Select `ourapps-ae/web-host` when the recipe's targets include `web`. Connect the `theme` requirement to the theme component so colour names resolve. Pass the answers for application name, short name, colours, icon and web address as settings. Provide the 512 and 192 pixel icons in the application's `public/` folder.
 
-- Select package `ourapps-ae/web-host` version `0.4.2`.
+- Select package `ourapps-ae/web-host` version `0.5.0`.
 - Settings to configure:
   - `applicationId` (string, slug; required)
   - `applicationName` (string, label; required)
