@@ -1,6 +1,18 @@
 {
   "artefacts": [
     {
+      "destination": "components/web-host/server/index.ts",
+      "executable": false,
+      "source": "implementation/server/index.ts",
+      "template": false
+    },
+    {
+      "destination": "components/web-host/web/index.ts",
+      "executable": false,
+      "source": "implementation/web/index.ts",
+      "template": false
+    },
+    {
       "destination": "components/web-host/web/install-banner.ts",
       "executable": false,
       "source": "implementation/web/install-banner.ts",
@@ -47,6 +59,8 @@
     "hosts": [],
     "secrets": [],
     "writes": [
+      "components/web-host/server/index.ts",
+      "components/web-host/web/index.ts",
       "components/web-host/web/install-banner.ts",
       "components/web-host/web/package.json",
       "components/web-host/web/public/sw.js",
@@ -151,6 +165,14 @@
     {
       "executable": false,
       "path": "examples/consumer.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/server/index.ts"
+    },
+    {
+      "executable": false,
+      "path": "implementation/web/index.ts"
     },
     {
       "executable": false,

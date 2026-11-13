@@ -40,6 +40,11 @@
         {
           "$ref": "#/components/errors/SettingsError"
         }
+      ],
+      "tags": [
+        {
+          "name": "typescript"
+        }
       ]
     },
     {
@@ -82,6 +87,11 @@
         {
           "$ref": "#/components/errors/SettingsError"
         }
+      ],
+      "tags": [
+        {
+          "name": "typescript"
+        }
       ]
     },
     {
@@ -108,7 +118,12 @@
         "schema": {
           "type": "string"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "renderHeaders",
@@ -119,7 +134,12 @@
         "schema": {
           "type": "string"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "headTags",
@@ -149,7 +169,12 @@
             "$ref": "#/components/schemas/HeadTag"
           }
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "webHostConfig",
@@ -172,6 +197,11 @@
       "errors": [
         {
           "$ref": "#/components/errors/SettingsError"
+        }
+      ],
+      "tags": [
+        {
+          "name": "server"
         }
       ]
     },
@@ -199,7 +229,12 @@
         "schema": {
           "$ref": "#/components/schemas/ShellHandle"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "browserHost",
@@ -210,7 +245,12 @@
         "schema": {
           "$ref": "#/components/schemas/ShellHost"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "startInstallBanner",
@@ -236,7 +276,12 @@
         "schema": {
           "description": "Function () => void."
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "bannerKind",
@@ -262,7 +307,12 @@
         "schema": {
           "$ref": "#/components/schemas/BannerKind"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     }
   ],
   "components": {
@@ -743,5 +793,9 @@
         }
       }
     }
+  },
+  "x-ourapps-modules": {
+    "web": "web/index.ts",
+    "server": "server/index.ts"
   }
 }

@@ -26,7 +26,12 @@
             "type": "string"
           }
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "resolveTheme",
@@ -67,6 +72,11 @@
           "code": 3,
           "message": "no themes"
         }
+      ],
+      "tags": [
+        {
+          "name": "typescript"
+        }
       ]
     },
     {
@@ -90,7 +100,12 @@
             "type": "string"
           }
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "colourTable",
@@ -110,7 +125,12 @@
         "schema": {
           "$ref": "#/components/schemas/ColourTable"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "accentColour",
@@ -130,7 +150,12 @@
         "schema": {
           "$ref": "#/components/schemas/OpaqueColour"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "shellPalette",
@@ -150,7 +175,12 @@
         "schema": {
           "$ref": "#/components/schemas/ShellPalette"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "cssVariables",
@@ -170,7 +200,12 @@
         "schema": {
           "$ref": "#/components/schemas/CssVariables"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "renderCss",
@@ -190,7 +225,12 @@
         "schema": {
           "type": "string"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "renderSwift",
@@ -210,7 +250,12 @@
         "schema": {
           "type": "string"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "renderKotlin",
@@ -230,7 +275,12 @@
         "schema": {
           "type": "string"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "buildAll",
@@ -255,6 +305,11 @@
         {
           "code": 4,
           "message": "<theme>: <problem>; ... (tokens do not validate)"
+        }
+      ],
+      "tags": [
+        {
+          "name": "server"
         }
       ]
     },
@@ -284,7 +339,12 @@
           "type": "null"
         },
         "description": "Nothing is returned."
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "isColour",
@@ -302,7 +362,12 @@
         "schema": {
           "type": "boolean"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "typescript"
+        }
+      ]
     },
     {
       "name": "parseColourSetting",
@@ -327,6 +392,11 @@
         {
           "code": 1,
           "message": "not a colour (write hex rrggbb)"
+        }
+      ],
+      "tags": [
+        {
+          "name": "typescript"
         }
       ]
     },
@@ -353,6 +423,11 @@
         {
           "code": 1,
           "message": "not a colour"
+        }
+      ],
+      "tags": [
+        {
+          "name": "typescript"
         }
       ]
     },
@@ -388,7 +463,12 @@
             "$ref": "#/components/schemas/Particle"
           }
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "makeSpecks",
@@ -413,7 +493,12 @@
             "$ref": "#/components/schemas/Speck"
           }
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "flicker",
@@ -440,7 +525,12 @@
         "schema": {
           "type": "number"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "glyphFrame",
@@ -510,7 +600,12 @@
             }
           ]
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "speckFrame",
@@ -558,7 +653,12 @@
         "schema": {
           "$ref": "#/components/schemas/SpeckFrame"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "figureBox",
@@ -608,7 +708,12 @@
         "schema": {
           "$ref": "#/components/schemas/Box"
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "Background",
@@ -644,7 +749,12 @@
           ],
           "description": "The running background."
         }
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "Background.setTheme",
@@ -665,7 +775,12 @@
           "type": "null"
         },
         "description": "Nothing is returned."
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "Background.setScene",
@@ -686,7 +801,12 @@
           "type": "null"
         },
         "description": "Nothing is returned."
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     },
     {
       "name": "Background.stop",
@@ -699,7 +819,12 @@
           "type": "null"
         },
         "description": "Nothing is returned."
-      }
+      },
+      "tags": [
+        {
+          "name": "web"
+        }
+      ]
     }
   ],
   "components": {
@@ -1418,5 +1543,11 @@
         }
       }
     }
+  },
+  "x-ourapps-modules": {
+    "web": "web/index.ts",
+    "server": "server/index.ts",
+    "android": "android/src/main/java",
+    "apple": "apple/Sources"
   }
 }
